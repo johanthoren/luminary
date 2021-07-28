@@ -17,7 +17,6 @@ Examples:
 
 ``` clojure
 (l/find-date 5 11)
-;; => 
 {:hebrew
  {:month-of-year 5,
   :months-in-year 12,
@@ -33,22 +32,37 @@ Examples:
    :day-of-week "5th day of the week"}},
  :time
  {:year
-  {:start #object[java.time.ZonedDateTime 0x209606cf "2021-04-12T19:06:09+03:00[Asia/Jerusalem]"],
-   :end #object[java.time.ZonedDateTime 0x2af1c9f5 "2022-04-01T18:58:34+03:00[Asia/Jerusalem]"]},
+  {:start
+   #object[java.time.ZonedDateTime 0x7cb6ce48 "2021-04-12T19:06:09+03:00[Asia/Jerusalem]"],
+   :end
+   #object[java.time.ZonedDateTime 0x1ad646a6 "2022-04-01T18:58:34+03:00[Asia/Jerusalem]"],
+   :start-adjusted-for-polar-region false,
+   :end-adjusted-for-polar-region false},
   :month
-  {:start #object[java.time.ZonedDateTime 0x703e54e5 "2021-08-08T19:29:36+03:00[Asia/Jerusalem]"],
-   :end #object[java.time.ZonedDateTime 0x29d71d73 "2021-09-07T18:55:23+03:00[Asia/Jerusalem]"]},
+  {:start
+   #object[java.time.ZonedDateTime 0x107e0c2f "2021-08-08T19:29:36+03:00[Asia/Jerusalem]"],
+   :end
+   #object[java.time.ZonedDateTime 0xdfae2ea "2021-09-07T18:55:23+03:00[Asia/Jerusalem]"],
+   :start-adjusted-for-polar-region false,
+   :end-adjusted-for-polar-region false},
   :week
-  {:start #object[java.time.ZonedDateTime 0x71a9fb30 "2021-08-14T19:23:43+03:00[Asia/Jerusalem]"],
-   :end #object[java.time.ZonedDateTime 0x3fdfeb4b "2021-08-21T19:16:08+03:00[Asia/Jerusalem]"]},
+  {:start
+   #object[java.time.ZonedDateTime 0x5b64f5e5 "2021-08-14T19:23:43+03:00[Asia/Jerusalem]"],
+   :end
+   #object[java.time.ZonedDateTime 0x2b8b08e0 "2021-08-21T19:16:08+03:00[Asia/Jerusalem]"],
+   :start-adjusted-for-polar-region false,
+   :end-adjusted-for-polar-region false},
   :day
-  {:start #object[java.time.ZonedDateTime 0x6fa2c8b0 "2021-08-18T19:19:29+03:00[Asia/Jerusalem]"],
-   :end #object[java.time.ZonedDateTime 0x4b5afa8b "2021-08-19T19:18:22+03:00[Asia/Jerusalem]"],
-   :adjusted-for-polar-region false}}}
+  {:start
+   #object[java.time.ZonedDateTime 0x40cb74e6 "2021-08-18T19:19:29+03:00[Asia/Jerusalem]"],
+   :end
+   #object[java.time.ZonedDateTime 0x7d91e763 "2021-08-19T19:18:22+03:00[Asia/Jerusalem]"],
+   :start-adjusted-for-polar-region false,
+   :end-adjusted-for-polar-region false}}}
 ```
 
 ``` clojure
-(l/find-date-in-year 59.3325800 18.0649000 "Europe/Stockholm" 2025 1 14)
+(l/find-date-in-year 78.2253587 15.4878901 "Europe/Oslo" 2025 1 14)
 ;; => 
 {:hebrew
  {:month-of-year 1,
@@ -66,18 +80,33 @@ Examples:
    :day-of-week "Sabbath"}},
  :time
  {:year
-  {:start #object[java.time.ZonedDateTime 0x3025eb10 "2025-03-29T18:23:56+01:00[Europe/Stockholm]"],
-   :end #object[java.time.ZonedDateTime 0x2d1c36e5 "2026-04-17T20:08:29+02:00[Europe/Stockholm]"]},
+  {:start
+   #object[java.time.ZonedDateTime 0x74968291 "2025-03-29T19:32:29+01:00[Europe/Oslo]"],
+   :end
+   #object[java.time.ZonedDateTime 0x1e60a90e "2026-04-18T00:14:16+02:00[Europe/Oslo]"],
+   :start-adjusted-for-polar-region false,
+   :end-adjusted-for-polar-region false},
   :month
-  {:start #object[java.time.ZonedDateTime 0x4bb44016 "2025-03-29T18:23:56+01:00[Europe/Stockholm]"],
-   :end #object[java.time.ZonedDateTime 0x3751a89 "2025-04-28T20:35:28+02:00[Europe/Stockholm]"]},
+  {:start
+   #object[java.time.ZonedDateTime 0x530073a2 "2025-03-29T19:32:29+01:00[Europe/Oslo]"],
+   :end
+   #object[java.time.ZonedDateTime 0x2bafe6d "2025-04-28T21:24:44+02:00[Europe/Oslo]"],
+   :start-adjusted-for-polar-region false,
+   :end-adjusted-for-polar-region true},
   :week
-  {:start #object[java.time.ZonedDateTime 0x50423184 "2025-04-05T19:40:30+02:00[Europe/Stockholm]"],
-   :end #object[java.time.ZonedDateTime 0x2df2b0e1 "2025-04-12T19:57:07+02:00[Europe/Stockholm]"]},
+  {:start
+   #object[java.time.ZonedDateTime 0x72b2edf3 "2025-04-05T21:31:02+02:00[Europe/Oslo]"],
+   :end
+   #object[java.time.ZonedDateTime 0x414e156b "2025-04-12T22:44:36+02:00[Europe/Oslo]"],
+   :start-adjusted-for-polar-region false,
+   :end-adjusted-for-polar-region false},
   :day
-  {:start #object[java.time.ZonedDateTime 0x62560a71 "2025-04-11T19:54:45+02:00[Europe/Stockholm]"],
-   :end #object[java.time.ZonedDateTime 0x96ff0a2 "2025-04-12T19:57:07+02:00[Europe/Stockholm]"],
-   :adjusted-for-polar-region false}}}
+  {:start
+   #object[java.time.ZonedDateTime 0x145b19b5 "2025-04-11T22:32:18+02:00[Europe/Oslo]"],
+   :end
+   #object[java.time.ZonedDateTime 0x2d4b124f "2025-04-12T22:44:36+02:00[Europe/Oslo]"],
+   :start-adjusted-for-polar-region false,
+   :end-adjusted-for-polar-region false}}}
 ```
 
 ## Background
