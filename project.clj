@@ -1,4 +1,4 @@
-(defproject xyz.thoren/luminary "0.1.0"
+(defproject xyz.thoren/luminary "0.1.1-SNAPSHOT"
   :description "Calculate dates based on the Bible and the 1st Book of Enoch."
   :url "https://github.com/johanthoren/luminary"
   :license {:name "LGPL-3.0"
