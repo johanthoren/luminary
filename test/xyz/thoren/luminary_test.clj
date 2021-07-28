@@ -628,3 +628,30 @@
         (is (true? (get-in h [:hebrew :sabbath])))
         (is (not= "Purim" (get-in h [:hebrew :feast-day :name])))
         (is (= "Adar II" (get-in h [:hebrew :names :traditional-month-of-year])))))))
+
+(deftest hebrew-dates-at-longyearbyen
+  (testing "that some select days are correctly calculated and reported"
+    (let [r (fn [& args]
+              (l/hebrew-date longyearbyen-latitude longyearbyen-longitude
+                               (apply #'xyz.thoren.luminary/make-zoned-date
+                                      (flatten ["Europe/Oslo" args]))))]
+      (let [h (r 2021 4 12 12 0)]
+        (is (= 13 (get-in h [:hebrew :month-of-year])))
+        (is (= 30 (get-in h [:hebrew :day-of-month])))
+        (is (= 2 (get-in h [:hebrew :day-of-week])))
+        (is (false? (get-in h [:hebrew :sabbath]))))
+      (let [h (r 2021 6 20 2 0)]
+        (is (= 3 (get-in h [:hebrew :month-of-year])))
+        (is (= 10 (get-in h [:hebrew :day-of-month])))
+        (is (= 1 (get-in h [:hebrew :day-of-week])))
+        (is (true? (get-in h [:hebrew :sabbath])))
+        (is (= "Feast of Weeks" (get-in h [:hebrew :feast-day :name])))
+        (is (= "Sivan" (get-in h [:hebrew :names :traditional-month-of-year])))
+        (is (true? (get-in h [:time :day :start-adjusted-for-polar-region])))
+        (is (true? (get-in h [:time :day :end-adjusted-for-polar-region])))
+        (is (true? (get-in h [:time :week :start-adjusted-for-polar-region])))
+        (is (true? (get-in h [:time :week :end-adjusted-for-polar-region])))
+        (is (true? (get-in h [:time :month :start-adjusted-for-polar-region])))
+        (is (true? (get-in h [:time :month :end-adjusted-for-polar-region])))
+        (is (false? (get-in h [:time :year :start-adjusted-for-polar-region])))
+        (is (false? (get-in h [:time :year :end-adjusted-for-polar-region])))))))

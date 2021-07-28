@@ -65,7 +65,7 @@
        :always-down always-down
        :always-up always-up})))
 
-(defn- next-start-of-day
+(defn- next-start-of-day-full-map
   [lat lon date]
   ;; The dancing back and forth in the following function is due to the fact
   ;; that `SunTimes/compute` seems to give different answers depending on what
@@ -77,13 +77,16 @@
   (->> (next-sunset lat lon date)
        (:sunset)
        (go-back (t/hours 1))
-       (next-sunset lat lon)
-       (:sunset)))
+       (next-sunset lat lon)))
+
+(defn- next-start-of-day
+  [lat lon date]
+  (:sunset (next-start-of-day-full-map lat lon date)))
 
 (defn- previous-start-of-day
   [lat lon date]
   (->> (next-start-of-day lat lon date)
-       (go-back (t/seconds 86760))
+       (go-back (t/hours 25))
        (next-start-of-day lat lon)))
 
 (defn- noon
@@ -99,7 +102,7 @@
   [lat lon date]
   (let [p (previous-start-of-day lat lon date)
         n (next-start-of-day lat lon (noon lat lon (go-forward (t/hours 16) p)))]
-    [p (go-back (t/seconds 1) n) (:adjusted-for-polar-region n)]))
+    [p (go-back (t/seconds 1) n)]))
 
 (defn- calculate-new-moon
   [date]
@@ -178,7 +181,7 @@
   [lat lon date]
   (let [p (previous-start-of-month lat lon date)
         n (next-start-of-month lat lon (go-forward (t/days 2) p))]
-    [p (go-back (t/seconds 1) n) (:adjusted-for-polar-region n)]))
+    [p (go-back (t/seconds 1) n)]))
 
 (defn- next-march-equinox
   [date]
@@ -258,7 +261,7 @@
   [lat lon date]
   (let [p (previous-start-of-year lat lon date)
         n (next-start-of-year lat lon (go-forward (t/days 1) p))]
-    [p (go-back (t/seconds 1) n) (:adjusted-for-polar-region n)]))
+    [p (go-back (t/seconds 1) n)]))
 
 (defn- next-start-of-week
   [lat lon date]
@@ -284,7 +287,7 @@
   [lat lon date]
   (let [p (previous-start-of-week lat lon date)
         n (next-start-of-week lat lon (go-forward (t/days 1) p))]
-    [p (go-back (t/seconds 1) n) (:adjusted-for-polar-region n)]))
+    [p (go-back (t/seconds 1) n)]))
 
 (defn- start-of-days-in-week
   [lat lon date]
@@ -505,6 +508,19 @@
   [start end]
   (t/as (t/duration start end) :days))
 
+(defn- polar-adjusted?
+  [lat lon date]
+  (if (<= -65 lat 65)
+    false
+    (->> (go-back (t/hours 2) date)
+         (next-start-of-day-full-map lat lon)
+         (:adjusted-for-polar-region))))
+
+(defn- with-polar-status
+  [lat lon m]
+  (assoc m :start-adjusted-for-polar-region (polar-adjusted? lat lon (:start m))
+           :end-adjusted-for-polar-region (polar-adjusted? lat lon (:end m))))
+
 (defn now "Return the current time." [] (t/zoned-date-time))
 
 (defn hebrew-date
@@ -545,11 +561,16 @@
    (let [day-boundaries (boundaries-of-day lat lon date)
          week-boundaries (boundaries-of-week lat lon date)
          month-boundaries (boundaries-of-month lat lon date)
-         start-of-month (first month-boundaries)
-         end-of-month (second month-boundaries)
          year-boundaries (boundaries-of-year lat lon date)
-         days-in-year (days-between (first year-boundaries)
-                                    (second year-boundaries))
+         start-of-year (first year-boundaries)
+         end-of-year (last year-boundaries)
+         start-of-month (first month-boundaries)
+         end-of-month (last month-boundaries)
+         start-of-week (first week-boundaries)
+         end-of-week (last week-boundaries)
+         start-of-day (first day-boundaries)
+         end-of-day (last day-boundaries)
+         days-in-year (days-between start-of-year end-of-year)
          months-in-year (if (<= 383 days-in-year 384) 13 12)
          month (month lat lon date)
          dom (day-of-month lat lon date)
@@ -575,18 +596,10 @@
                          (nth traditional-month-names (dec month)))
                        :day-of-month (nth day-numbers (dec dom))
                        :day-of-week (nth weekday-names (dec dow))}}
-      :time {:year {:start (first year-boundaries)
-                    :end (second year-boundaries)
-                    :adjusted-for-polar-region (nth year-boundaries 2 false)}
-             :month {:start (first month-boundaries)
-                     :end (second month-boundaries)
-                     :adjusted-for-polar-region (nth month-boundaries 2 false)}
-             :week {:start (first week-boundaries)
-                    :end (second week-boundaries)
-                    :adjusted-for-polar-region (nth week-boundaries 2 false)}
-             :day {:start (first day-boundaries)
-                   :end (second day-boundaries)
-                   :adjusted-for-polar-region (nth day-boundaries 2 false)}}}))
+      :time {:year (with-polar-status lat lon {:start start-of-year :end end-of-year})
+             :month (with-polar-status lat lon {:start start-of-month :end end-of-month})
+             :week (with-polar-status lat lon {:start start-of-week :end end-of-week})
+             :day (with-polar-status lat lon {:start start-of-day :end end-of-day})}}))
   ([lat lon]
    {:pre [(and (number? lat) (<= -90 lat 90))
           (and (number? lon) (<= -180 lon 180))]}
