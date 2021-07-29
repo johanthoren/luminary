@@ -17,6 +17,7 @@ Examples:
 
 ``` clojure
 (l/find-date 5 11)
+;; => 
 {:hebrew
  {:month-of-year 5,
   :months-in-year 12,
