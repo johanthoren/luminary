@@ -516,10 +516,14 @@
          (next-start-of-day-full-map lat lon)
          (:adjusted-for-polar-region))))
 
-(defn- with-polar-status
+(defn- assoc-polar-status
   [lat lon m]
   (assoc m :start-adjusted-for-polar-region (polar-adjusted? lat lon (:start m))
            :end-adjusted-for-polar-region (polar-adjusted? lat lon (:end m))))
+
+(defn- with-polar-status
+  [lat lon m]
+  (into (empty m) (for [[k v] m] [k (assoc-polar-status lat lon v)])))
 
 (defn now "Return the current time." [] (t/zoned-date-time))
 
@@ -596,10 +600,11 @@
                          (nth traditional-month-names (dec month)))
                        :day-of-month (nth day-numbers (dec dom))
                        :day-of-week (nth weekday-names (dec dow))}}
-      :time {:year (with-polar-status lat lon {:start start-of-year :end end-of-year})
-             :month (with-polar-status lat lon {:start start-of-month :end end-of-month})
-             :week (with-polar-status lat lon {:start start-of-week :end end-of-week})
-             :day (with-polar-status lat lon {:start start-of-day :end end-of-day})}}))
+      :time (with-polar-status lat lon
+              {:year {:start start-of-year :end end-of-year}
+               :month {:start start-of-month :end end-of-month}
+               :week {:start start-of-week :end end-of-week}
+               :day {:start start-of-day :end end-of-day}})}))
   ([lat lon]
    {:pre [(and (number? lat) (<= -90 lat 90))
           (and (number? lon) (<= -180 lon 180))]}
