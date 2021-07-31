@@ -446,47 +446,47 @@
 (defn- feast-day?
   "Given `m` (hebrew month of year), `d` (hebrew day of month), and `dow`
   (hebrew day of week), return a map containing details of any feast day on that
-  day, or return `false` if there is none.
-
-  `:days-in-prev-month` is mandatory if `m` = 10 and `d` is <= 1 and 3."
-  [m d dow & {:keys [days-in-prev-month]}]
-  {:pre [(or (not (and (= m 10) (<= 1 d 3)))
-             (<= 29 days-in-prev-month 30))]}
-  (cond
-    (and (= m 1) (= d 14)) pesach
-    (and (= m 1) (= d 15)) (ha-matzot 1)
-    (and (= m 1) (< 15 d 22) (= dow 1)) yom-bikkurim
-    (and (= m 1) (= d 16)) (ha-matzot 2)
-    (and (= m 1) (= d 17)) (ha-matzot 3)
-    (and (= m 1) (= d 18)) (ha-matzot 4)
-    (and (= m 1) (= d 19)) (ha-matzot 5)
-    (and (= m 1) (= d 20)) (ha-matzot 6)
-    (and (= m 1) (= d 21)) (ha-matzot 7)
-    (and (= m 3) (< 5 d 12) (= dow 1)) shavuot
-    (and (= m 7) (= d 1)) yom-teruah
-    (and (= m 7) (= d 10)) yom-ha-kippurim
-    (and (= m 7) (= d 15)) (ha-sukkot 1)
-    (and (= m 7) (= d 16)) (ha-sukkot 2)
-    (and (= m 7) (= d 17)) (ha-sukkot 3)
-    (and (= m 7) (= d 18)) (ha-sukkot 4)
-    (and (= m 7) (= d 19)) (ha-sukkot 5)
-    (and (= m 7) (= d 20)) (ha-sukkot 6)
-    (and (= m 7) (= d 21)) (ha-sukkot 7)
-    (and (= m 7) (= d 22)) shemini-atzeret
-    (and (= m 9) (= d 25)) (chanukah 1)
-    (and (= m 9) (= d 26)) (chanukah 2)
-    (and (= m 9) (= d 27)) (chanukah 3)
-    (and (= m 9) (= d 28)) (chanukah 4)
-    (and (= m 9) (= d 29)) (chanukah 5)
-    (and (= m 9) (= d 30)) (chanukah 6)
-    (and (= m 10) (= d 1) (= days-in-prev-month 29)) (chanukah 6)
-    (and (= m 10) (= d 1) (= days-in-prev-month 30)) (chanukah 7)
-    (and (= m 10) (= d 2) (= days-in-prev-month 29)) (chanukah 7)
-    (and (= m 10) (= d 2) (= days-in-prev-month 30)) (chanukah 8)
-    (and (= m 10) (= d 3) (= days-in-prev-month 29)) (chanukah 8)
-    (and (= m 12) (= d 14)) purim
-    (and (= m 12) (= d 15)) shushan-purim
-    :else false))
+  day, or return `false` if there is none."
+  [m d dow & {:keys [days-in-first-month days-in-prev-month]}]
+  (let [two-first-months (when (and days-in-first-month days-in-prev-month)
+                           (+ days-in-first-month days-in-prev-month))]
+    (cond
+      (and (= m 1) (= d 14)) pesach
+      (and (= m 1) (= d 15)) (ha-matzot 1)
+      (and (= m 1) (<= 16 d 21) (= dow 1)) yom-bikkurim
+      (and (= m 1) (= d 16)) (ha-matzot 2)
+      (and (= m 1) (= d 17)) (ha-matzot 3)
+      (and (= m 1) (= d 18)) (ha-matzot 4)
+      (and (= m 1) (= d 19)) (ha-matzot 5)
+      (and (= m 1) (= d 20)) (ha-matzot 6)
+      (and (= m 1) (= d 21)) (ha-matzot 7)
+      (and (= two-first-months 58) (= m 3) (<= 7 d 12) (= dow 1)) shavuot
+      (and (= two-first-months 59) (= m 3) (<= 6 d 11) (= dow 1)) shavuot
+      (and (= two-first-months 60) (= m 3) (<= 5 d 10) (= dow 1)) shavuot
+      (and (= m 7) (= d 1)) yom-teruah
+      (and (= m 7) (= d 10)) yom-ha-kippurim
+      (and (= m 7) (= d 15)) (ha-sukkot 1)
+      (and (= m 7) (= d 16)) (ha-sukkot 2)
+      (and (= m 7) (= d 17)) (ha-sukkot 3)
+      (and (= m 7) (= d 18)) (ha-sukkot 4)
+      (and (= m 7) (= d 19)) (ha-sukkot 5)
+      (and (= m 7) (= d 20)) (ha-sukkot 6)
+      (and (= m 7) (= d 21)) (ha-sukkot 7)
+      (and (= m 7) (= d 22)) shemini-atzeret
+      (and (= m 9) (= d 25)) (chanukah 1)
+      (and (= m 9) (= d 26)) (chanukah 2)
+      (and (= m 9) (= d 27)) (chanukah 3)
+      (and (= m 9) (= d 28)) (chanukah 4)
+      (and (= m 9) (= d 29)) (chanukah 5)
+      (and (= m 9) (= d 30)) (chanukah 6)
+      (and (= m 10) (= d 1) (= days-in-prev-month 29)) (chanukah 6)
+      (and (= m 10) (= d 1) (= days-in-prev-month 30)) (chanukah 7)
+      (and (= m 10) (= d 2) (= days-in-prev-month 29)) (chanukah 7)
+      (and (= m 10) (= d 2) (= days-in-prev-month 30)) (chanukah 8)
+      (and (= m 10) (= d 3) (= days-in-prev-month 29)) (chanukah 8)
+      (and (= m 12) (= d 14)) purim
+      (and (= m 12) (= d 15)) shushan-purim
+      :else false)))
 
 (defn- sabbath?
   "Given the hebrew `month-of-year`, `day-of-month`, and `day-of-week`, return
@@ -586,12 +586,24 @@
                :day-of-week dow
                :sabbath (sabbath? month dom dow)
                :feast-day (feast-day? month dom dow
-                                      :days-in-prev-month
-                                      (when (and (= month 10) (< dom 4))
+                                      :days-in-first-month
+                                      (when (and (= month 3) (< 4 dom 12))
                                         (let [b (boundaries-of-month
-                                                 lat lon
-                                                 (go-back (t/days 1)
-                                                          start-of-month))]
+                                                 jerusalem-lat jerusalem-lon
+                                                 (zone-it "Asia/Jerusalem"
+                                                          (go-forward
+                                                           (t/days 2)
+                                                           start-of-year)))]
+                                          (days-between (first b) (second b))))
+                                      :days-in-prev-month
+                                      (when (or (and (= month 3) (< 4 dom 12))
+                                                (and (= month 10) (< 0 dom 4)))
+                                        (let [b (boundaries-of-month
+                                                 jerusalem-lat jerusalem-lon
+                                                 (zone-it "Asia/Jerusalem"
+                                                          (go-back
+                                                           (t/days 2)
+                                                           start-of-month)))]
                                           (days-between (first b) (second b)))))
                :names {:month-of-year (nth month-numbers (dec month))
                        :traditional-month-of-year

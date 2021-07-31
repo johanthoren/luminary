@@ -423,7 +423,14 @@
         (is (= 7 (get-in h [:hebrew :day-of-week])))
         (is (true? (get-in h [:hebrew :sabbath])))
         (is (not= "Purim" (get-in h [:hebrew :feast-day :name])))
-        (is (= "Adar II" (get-in h [:hebrew :names :traditional-month-of-year])))))))
+        (is (= "Adar II" (get-in h [:hebrew :names :traditional-month-of-year]))))
+      (let [h (r 2030 6 9 3 0)]
+        (is (= 3 (get-in h [:hebrew :month-of-year])))
+        (is (= 8 (get-in h [:hebrew :day-of-month])))
+        (is (= 1 (get-in h [:hebrew :day-of-week])))
+        (is (true? (get-in h [:hebrew :sabbath])))
+        (is (= "Feast of Weeks" (get-in h [:hebrew :feast-day :name])))
+        (is (= "Sivan" (get-in h [:hebrew :names :traditional-month-of-year])))))))
 
 (deftest hebrew-dates-in-arvidsjaur
   (testing "that some select days are correctly calculated and reported"
@@ -525,7 +532,14 @@
         (is (= 7 (get-in h [:hebrew :day-of-week])))
         (is (true? (get-in h [:hebrew :sabbath])))
         (is (not= "Purim" (get-in h [:hebrew :feast-day :name])))
-        (is (= "Adar II" (get-in h [:hebrew :names :traditional-month-of-year])))))))
+        (is (= "Adar II" (get-in h [:hebrew :names :traditional-month-of-year]))))
+      (let [h (r 2030 6 9 3 0)]
+        (is (= 3 (get-in h [:hebrew :month-of-year])))
+        (is (= 8 (get-in h [:hebrew :day-of-month])))
+        (is (= 1 (get-in h [:hebrew :day-of-week])))
+        (is (true? (get-in h [:hebrew :sabbath])))
+        (is (= "Feast of Weeks" (get-in h [:hebrew :feast-day :name])))
+        (is (= "Sivan" (get-in h [:hebrew :names :traditional-month-of-year])))))))
 
 (deftest hebrew-dates-at-temple-mount
   (testing "that some select days are correctly calculated and reported"
@@ -627,7 +641,14 @@
         (is (= 7 (get-in h [:hebrew :day-of-week])))
         (is (true? (get-in h [:hebrew :sabbath])))
         (is (not= "Purim" (get-in h [:hebrew :feast-day :name])))
-        (is (= "Adar II" (get-in h [:hebrew :names :traditional-month-of-year])))))))
+        (is (= "Adar II" (get-in h [:hebrew :names :traditional-month-of-year]))))
+      (let [h (r 2030 6 9 3 0)]
+        (is (= 3 (get-in h [:hebrew :month-of-year])))
+        (is (= 8 (get-in h [:hebrew :day-of-month])))
+        (is (= 1 (get-in h [:hebrew :day-of-week])))
+        (is (true? (get-in h [:hebrew :sabbath])))
+        (is (= "Feast of Weeks" (get-in h [:hebrew :feast-day :name])))
+        (is (= "Sivan" (get-in h [:hebrew :names :traditional-month-of-year])))))))
 
 (deftest hebrew-dates-at-longyearbyen
   (testing "that some select days are correctly calculated and reported"
@@ -654,4 +675,11 @@
         (is (true? (get-in h [:time :month :start-adjusted-for-polar-region])))
         (is (true? (get-in h [:time :month :end-adjusted-for-polar-region])))
         (is (false? (get-in h [:time :year :start-adjusted-for-polar-region])))
-        (is (false? (get-in h [:time :year :end-adjusted-for-polar-region])))))))
+        (is (false? (get-in h [:time :year :end-adjusted-for-polar-region]))))
+      (let [h (r 2030 6 9 3 0)]
+        (is (= 3 (get-in h [:hebrew :month-of-year])))
+        (is (= 8 (get-in h [:hebrew :day-of-month])))
+        (is (= 1 (get-in h [:hebrew :day-of-week])))
+        (is (true? (get-in h [:hebrew :sabbath])))
+        (is (= "Feast of Weeks" (get-in h [:hebrew :feast-day :name])))
+        (is (= "Sivan" (get-in h [:hebrew :names :traditional-month-of-year])))))))
