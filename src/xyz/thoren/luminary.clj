@@ -443,12 +443,33 @@
    :day-of-feast 2
    :days-in-feast 2})
 
+(defn- days-between
+  "Given a `start` and an `end`, calculate the duration between the events in
+  days."
+  [start end]
+  (t/as (t/duration start end) :days))
+
 (defn- feast-day?
   "Given `m` (hebrew month of year), `d` (hebrew day of month), and `dow`
   (hebrew day of week), return a map containing details of any feast day on that
   day, or return `false` if there is none."
-  [m d dow & {:keys [days-in-first-month days-in-prev-month]}]
-  (let [two-first-months (when (and days-in-first-month days-in-prev-month)
+  [m d dow start-of-year start-of-month]
+  (let [days-in-first-month (when (and (= m 3) (<= 5 d 12))
+                              (as-> (go-forward (t/days 2) start-of-year) <>
+                                    (zone-it "Asia/Jerusalem" <>)
+                                    (boundaries-of-month jerusalem-lat
+                                                         jerusalem-lon
+                                                         <>)
+                                    (days-between (first <>) (second <>))))
+        days-in-prev-month (when (or (and (= m 3) (<= 5 d 12))
+                                     (and (= m 10) (< 0 d 4)))
+                              (as-> (go-back (t/days 2) start-of-month) <>
+                                    (zone-it "Asia/Jerusalem" <>)
+                                    (boundaries-of-month jerusalem-lat
+                                                         jerusalem-lon
+                                                         <>)
+                                    (days-between (first <>) (second <>))))
+        two-first-months (when (and days-in-first-month days-in-prev-month)
                            (+ days-in-first-month days-in-prev-month))]
     (cond
       (and (= m 1) (= d 14)) pesach
@@ -491,22 +512,16 @@
 (defn- sabbath?
   "Given the hebrew `month-of-year`, `day-of-month`, and `day-of-week`, return
   `true` if it's a Sabbath or `false` if it's not."
-  [month-of-year day-of-month day-of-week]
+  [month-of-year day-of-month day-of-week feast-day]
   (or (= 7 day-of-week)
       (and (= month-of-year 1) (= day-of-month 15))                      ; "First day of the Feast of Unleavened Bread"
-      (and (= month-of-year 1) (< 15 day-of-month 22) (= day-of-week 1)) ; "Feast of First Fruits"
       (and (= month-of-year 1) (= day-of-month 21))                      ; "Last day of the Feast of Unleavened Bread"
-      (and (= month-of-year 3) (< 5 day-of-month 12) (= day-of-week 1))  ; "Feast of Weeks"
       (and (= month-of-year 7) (= day-of-month 1))                       ; "Feast of Trumpets"
       (and (= month-of-year 7) (= day-of-month 10))                      ; "Day of Atonement"
       (and (= month-of-year 7) (= day-of-month 15))                      ; "First day of the Feast of Tabernacles"
-      (and (= month-of-year 7) (= day-of-month 22))))                    ; "The Last Great Day"
-
-(defn- days-between
-  "Given a `start` and an `end`, calculate the duration between the events in
-  days."
-  [start end]
-  (t/as (t/duration start end) :days))
+      (and (= month-of-year 7) (= day-of-month 22))                      ; "The Last Great Day"
+      (= "Feast of First Fruits" (:name feast-day))
+      (= "Feast of Weeks" (:name feast-day))))
 
 (defn- polar-adjusted?
   [lat lon date]
@@ -578,33 +593,16 @@
          months-in-year (if (<= 383 days-in-year 384) 13 12)
          month (month lat lon date)
          dom (day-of-month lat lon date)
-         dow (day-of-week lat lon date)]
+         dow (day-of-week lat lon date)
+         feast-day (feast-day? month dom dow start-of-year start-of-month)
+         sabbath (sabbath? month dom dow feast-day)]
      {:hebrew {:month-of-year month
                :months-in-year months-in-year
                :day-of-month dom
                :days-in-month (days-between start-of-month end-of-month)
                :day-of-week dow
-               :sabbath (sabbath? month dom dow)
-               :feast-day (feast-day? month dom dow
-                                      :days-in-first-month
-                                      (when (and (= month 3) (< 4 dom 12))
-                                        (let [b (boundaries-of-month
-                                                 jerusalem-lat jerusalem-lon
-                                                 (zone-it "Asia/Jerusalem"
-                                                          (go-forward
-                                                           (t/days 2)
-                                                           start-of-year)))]
-                                          (days-between (first b) (second b))))
-                                      :days-in-prev-month
-                                      (when (or (and (= month 3) (< 4 dom 12))
-                                                (and (= month 10) (< 0 dom 4)))
-                                        (let [b (boundaries-of-month
-                                                 jerusalem-lat jerusalem-lon
-                                                 (zone-it "Asia/Jerusalem"
-                                                          (go-back
-                                                           (t/days 2)
-                                                           start-of-month)))]
-                                          (days-between (first b) (second b)))))
+               :sabbath sabbath
+               :feast-day feast-day
                :names {:month-of-year (nth month-numbers (dec month))
                        :traditional-month-of-year
                        (if (and (= month 12) (= months-in-year 13))
