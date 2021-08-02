@@ -1,6 +1,8 @@
 (ns xyz.thoren.luminary
   (:require [java-time :as t]
-            [xyz.thoren.equinox :refer [march-equinox]])
+            [xyz.thoren.equinox :refer [march-equinox]]
+            [xyz.thoren.luminary-feast-data :refer [calculated-feast-days]]
+            [clojure.string :as str])
   (:import (org.shredzone.commons.suncalc SunTimes MoonPhase)))
 
 (def jerusalem-lat 31.7781161)
@@ -17,17 +19,11 @@
        (map #(% (march-equinox year)))
        (apply make-utc-date)))
 
-(defn- go-back
-  [adjustment date]
-  (t/adjust date t/minus adjustment))
+(defn- go-back [adjustment date] (t/adjust date t/minus adjustment))
 
-(defn- go-forward
-  [adjustment date]
-  (t/adjust date t/plus adjustment))
+(defn- go-forward [adjustment date] (t/adjust date t/plus adjustment))
 
-(defn- tz?
-  [date]
-  (t/zone-id date))
+(defn- tz? [date] (t/zone-id date))
 
 (defn- calculate-sun-events
   [lat lon date]
@@ -40,30 +36,30 @@
         (.execute))))
 
 (defn- next-sunset
-  [lat lon date & {:keys [adjusted] :or {adjusted false}}]
+  [lat lon date & {:keys [adjusted], :or {adjusted false}}]
   (let [sun (calculate-sun-events lat lon date)
         always-up (.isAlwaysUp sun)
         always-down (.isAlwaysDown sun)
         sunset (.getSet sun)]
     (cond
       (or always-down always-up)
-      (cond
-        (< lat -65.7)
-        (next-sunset -65.7 lon date :adjusted true)
-        (> lat 65.7)
-        (next-sunset 65.7 lon date :adjusted true)
-        :else
-        (throw (Exception. (str "Sun either always up or always down but"
-                                " latitude is: " lat))))
+      (cond (< lat -65.7) (next-sunset -65.7 lon date :adjusted true)
+            (> lat 65.7) (next-sunset 65.7 lon date :adjusted true)
+            :else (throw
+                    (Exception. (str "Sun either always up or always down but"
+                                     " latitude is: "
+                                     lat))))
       (nil? sunset) ;; This seems to happen when the sunset happened the minute
-                  ;; before date.
-      (next-sunset lat lon (go-forward (t/minutes 1) date)
-                   :adjusted adjusted)
-      :else
-      {:sunset (t/truncate-to sunset :seconds)
-       :adjusted-for-polar-region adjusted
-       :always-down always-down
-       :always-up always-up})))
+                   ;; before date.
+      (next-sunset lat
+                   lon
+                   (go-forward (t/minutes 1) date)
+                   :adjusted
+                   adjusted)
+      :else {:sunset (t/truncate-to sunset :seconds),
+             :adjusted-for-polar-region adjusted,
+             :always-down always-down,
+             :always-up always-up})))
 
 (defn- next-start-of-day-full-map
   [lat lon date]
@@ -101,7 +97,9 @@
 (defn- boundaries-of-day
   [lat lon date]
   (let [p (previous-start-of-day lat lon date)
-        n (next-start-of-day lat lon (noon lat lon (go-forward (t/hours 16) p)))]
+        n (next-start-of-day lat
+                             lon
+                             (noon lat lon (go-forward (t/hours 16) p)))]
     [p (go-back (t/seconds 1) n)]))
 
 (defn- calculate-new-moon
@@ -150,9 +148,7 @@
        (go-back (t/days 32))
        (next-start-of-month-in-israel)))
 
-(defn- year-month-day
-  [date]
-  (t/as date :year :month-of-year :day-of-month))
+(defn- year-month-day [date] (t/as date :year :month-of-year :day-of-month))
 
 (defn- make-zoned-date
   [tz & args]
@@ -167,9 +163,9 @@
     (if (= (year-month-day prev-month-israel) (year-month-day next-day))
       next-day
       (as-> (year-month-day next-month-israel) <>
-            (make-zoned-date tz (first <>) (second <>) (last <>))
-            (noon lat lon <>)
-            (next-start-of-day lat lon <>)))))
+        (make-zoned-date tz (first <>) (second <>) (last <>))
+        (noon lat lon <>)
+        (next-start-of-day lat lon <>)))))
 
 (defn- previous-start-of-month
   [lat lon date]
@@ -208,29 +204,29 @@
         previous-month (previous-start-of-month-in-israel zdate)
         pme (previous-march-equinox zdate)
         moon-following-previous-equinox (next-new-moon pme)
-        day-following-moon (next-start-of-day jerusalem-lat jerusalem-lon
+        day-following-moon (next-start-of-day jerusalem-lat
+                                              jerusalem-lon
                                               moon-following-previous-equinox)
         next-day (next-start-of-day jerusalem-lat jerusalem-lon zdate)
-        potential-new-year (next-start-of-month-in-israel
-                            (next-march-equinox zdate))]
-    (cond
-      (zero? (t/as (t/duration day-following-moon next-day) :seconds))
-      next-day
-      (t/before? previous-month this-year-march-equinox zdate)
-      (next-start-of-month-in-israel zdate)
-      :else
-      potential-new-year)))
+        potential-new-year (next-start-of-month-in-israel (next-march-equinox
+                                                            zdate))]
+    (cond (zero? (t/as (t/duration day-following-moon next-day) :seconds))
+          next-day
+          (t/before? previous-month this-year-march-equinox zdate)
+          (next-start-of-month-in-israel zdate)
+          :else potential-new-year)))
 
 (defn- previous-start-of-year-in-israel
   [date]
   (let [y (t/as date :year)
         m (t/as date :month-of-year)]
-    (cond
-      (> m 4) (next-start-of-year-in-israel (make-zoned-date jerusalem-tz y 2 1))
-      (< m 3) (next-start-of-year-in-israel (make-zoned-date jerusalem-tz (dec y) 2 1))
-      :else   (->> (next-start-of-year-in-israel date)
-                   (go-back (t/days 400))
-                   (next-start-of-year-in-israel)))))
+    (cond (> m 4) (next-start-of-year-in-israel
+                    (make-zoned-date jerusalem-tz y 2 1))
+          (< m 3) (next-start-of-year-in-israel
+                    (make-zoned-date jerusalem-tz (dec y) 2 1))
+          :else (->> (next-start-of-year-in-israel date)
+                     (go-back (t/days 400))
+                     (next-start-of-year-in-israel)))))
 
 (defn- next-start-of-year
   [lat lon date]
@@ -241,21 +237,20 @@
     (if (= (year-month-day prev-year-israel) (year-month-day next-day))
       next-day
       (as-> (year-month-day next-year-israel) <>
-            (make-zoned-date tz (first <>) (second <>) (last <>))
-            (noon lat lon <>)
-            (next-start-of-day lat lon <>)))))
+        (make-zoned-date tz (first <>) (second <>) (last <>))
+        (noon lat lon <>)
+        (next-start-of-day lat lon <>)))))
 
 (defn- previous-start-of-year
   [lat lon date]
   (let [y (t/as date :year)
         m (t/as date :month-of-year)
         tz (tz? date)]
-    (cond
-      (> m 4) (next-start-of-year lat lon (make-zoned-date tz y 2 1))
-      (< m 3) (next-start-of-year lat lon (make-zoned-date tz (dec y) 2 1))
-      :else   (->> (next-start-of-year lat lon date)
-                   (go-back (t/days 400))
-                   (next-start-of-year lat lon)))))
+    (cond (> m 4) (next-start-of-year lat lon (make-zoned-date tz y 2 1))
+          (< m 3) (next-start-of-year lat lon (make-zoned-date tz (dec y) 2 1))
+          :else (->> (next-start-of-year lat lon date)
+                     (go-back (t/days 400))
+                     (next-start-of-year lat lon)))))
 
 (defn- boundaries-of-year
   [lat lon date]
@@ -367,80 +362,84 @@
          (inc))))
 
 (def traditional-month-names
-  [ "Nisan" "Iyar" "Sivan" "Tammuz" "Av" "Elul" "Tishrei" "Marcheshvan"
-   "Kislev" "Tevet" "Shevat" "Adar" "Adar II"])
+  ["Nisan" "Iyar" "Sivan" "Tammuz" "Av" "Elul" "Tishrei" "Marcheshvan" "Kislev"
+   "Tevet" "Shevat" "Adar" "Adar II"])
 
 (def month-numbers
   (flatten ["1st" "2nd" "3rd" (map #(str % "th") (range 4 14))]))
 
 (def day-numbers
-  (flatten ["1st" "2nd" "3rd" (map #(str % "th") (range 4 21))
-            "21st" "22nd" "23rd" (map #(str % "th") (range 24 31))]))
+  (flatten ["1st" "2nd" "3rd" (map #(str % "th") (range 4 21)) "21st" "22nd"
+            "23rd" (map #(str % "th") (range 24 31))]))
 
 (def weekday-names
   (flatten [(map #(str % " day of the week")
-                 ["1st" "2nd" "3rd" "4th" "5th" "6th"])
-            "Sabbath"]))
+              ["1st" "2nd" "3rd" "4th" "5th" "6th"]) "Sabbath"]))
 
 (defn- single-day-feast
   [m]
-  (assoc m :day-of-feast 1 :days-in-feast 1))
+  (assoc m
+    :day-of-feast 1
+    :days-in-feast 1))
 
-(def pesach
-  (single-day-feast {:name "Passover" :hebrew-name "Pesach"}))
+(defn- rosh-chodesh
+  [trad-name]
+  (single-day-feast {:name (str "First day of " trad-name,)
+                     :hebrew-name (str "Rosh Chodesh " trad-name)}))
+
+(def pesach (single-day-feast {:name "Passover", :hebrew-name "Pesach"}))
 
 (defn- ha-matzot
   [day-of-feast]
-  {:name "Feast of Unleavened Bread"
-   :hebrew-name "Chag Ha-Matzot"
-   :day-of-feast day-of-feast
+  {:name "Feast of Unleavened Bread",
+   :hebrew-name "Chag Ha-Matzot",
+   :day-of-feast day-of-feast,
    :days-in-feast 7})
 
-(def yom-bikkurim
-  (single-day-feast {:name "Feast of First Fruits" :hebrew-name "Yom Bikkurim"}))
+(defn- yom-bikkurim
+  [day-of-month]
+  (single-day-feast {:name "Feast of First Fruits",
+                     :hebrew-name "Yom Bikkurim"}))
 
 (def shavuot
-  (single-day-feast
-   {:name "Feast of Weeks"
-    :alternative-name "Feast of Pentecost"
-    :hebrew-name "Shavuot"}))
+  (single-day-feast {:name "Feast of Weeks",
+                     :alternative-name "Feast of Pentecost",
+                     :hebrew-name "Shavuot"}))
 
 (defn- ha-sukkot
   [day-of-feast]
-  {:name "Feast of Tabernacles"
-   :alternative-name "Feast of Booths"
-   :hebrew-name "Chag Ha-Sukkot"
-   :day-of-feast day-of-feast
+  {:name "Feast of Tabernacles",
+   :alternative-name "Feast of Booths",
+   :hebrew-name "Chag Ha-Sukkot",
+   :day-of-feast day-of-feast,
    :days-in-feast 7})
 
 (def yom-teruah
-  (single-day-feast {:name "Feast of Trumpets" :hebrew-name "Yom Teruah"}))
+  (single-day-feast {:name "Feast of Trumpets", :hebrew-name "Yom Teruah"}))
 
 (def yom-ha-kippurim
-  (single-day-feast
-   {:name "Day of Atonement"
-    :hebrew-name "Yom Ha-Kippurim"
-    :alternative-hebrew-name "Yom Kippur"}))
+  (single-day-feast {:name "Day of Atonement",
+                     :hebrew-name "Yom Ha-Kippurim",
+                     :alternative-hebrew-name "Yom Kippur"}))
 
 (def shemini-atzeret
-  (single-day-feast
-   {:name "The Last Great Day"
-    :hebrew-name "Shemini Atzeret"}))
+  (single-day-feast {:name "The Last Great Day",
+                     :hebrew-name "Shemini Atzeret"}))
 
 (defn- chanukah
-  [day-of-feast]
-  {:name "Hanukkah"
-   :hebrew-name "Chanukah"
-   :day-of-feast day-of-feast
+  [day-of-month day-of-feast]
+  {:name "Hanukkah",
+   :hebrew-name "Chanukah",
+   :day-of-feast day-of-feast,
    :days-in-feast 8})
 
 (def purim
-  {:name "Purim" :hebrew-name "Purim" :day-of-feast 1 :days-in-feast 2})
+  {:name "Purim", :hebrew-name "Purim", :day-of-feast 1, :days-in-feast 2})
 
 (def shushan-purim
-  {:name "Shushan Purim"
-   :hebrew-name "Shushan Purim"
-   :day-of-feast 2
+  {:name "Shushan Purim",
+   :hebrew-name "Shushan Purim",
+   :day-of-feast 2,
    :days-in-feast 2})
 
 (defn- days-between
@@ -449,41 +448,47 @@
   [start end]
   (t/as (t/duration start end) :days))
 
-(defn- feast-day?
+(defn- minor-feast-day?
+  "Given `m` (hebrew month of year), `d` (hebrew day of month), return a map
+  with details of any minor feast day on that day, or
+  return false if there are none."
+  [m d]
+  (cond
+    (= d 1) (rosh-chodesh (nth traditional-month-names (dec m)))
+    :else false))
+
+(defn- major-feast-day?
   "Given `m` (hebrew month of year), `d` (hebrew day of month), and `dow`
-  (hebrew day of week), return a map containing details of any feast day on that
-  day, or return `false` if there is none."
+  (hebrew day of week), return a map with details of any major feast day on that
+  day, or return false if there are none."
   [m d dow start-of-year start-of-month]
-  (let [days-in-first-month (when (and (= m 3) (<= 5 d 12))
-                              (as-> (go-forward (t/days 2) start-of-year) <>
-                                    (zone-it "Asia/Jerusalem" <>)
-                                    (boundaries-of-month jerusalem-lat
-                                                         jerusalem-lon
-                                                         <>)
-                                    (days-between (first <>) (second <>))))
-        days-in-prev-month (when (or (and (= m 3) (<= 5 d 12))
-                                     (and (= m 10) (< 0 d 4)))
-                              (as-> (go-back (t/days 2) start-of-month) <>
-                                    (zone-it "Asia/Jerusalem" <>)
-                                    (boundaries-of-month jerusalem-lat
-                                                         jerusalem-lon
-                                                         <>)
-                                    (days-between (first <>) (second <>))))
+  (let [days-in-first-month
+          (when (and (= m 3) (<= 5 d 12))
+            (as-> (go-forward (t/days 2) start-of-year) <>
+              (zone-it "Asia/Jerusalem" <>)
+              (boundaries-of-month jerusalem-lat jerusalem-lon <>)
+              (days-between (first <>) (second <>))))
+        days-in-prev-month
+          (when (or (and (= m 3) (<= 5 d 12)) (and (= m 10) (< 0 d 4)))
+            (as-> (go-back (t/days 2) start-of-month) <>
+              (zone-it "Asia/Jerusalem" <>)
+              (boundaries-of-month jerusalem-lat jerusalem-lon <>)
+              (days-between (first <>) (second <>))))
         two-first-months (when (and days-in-first-month days-in-prev-month)
                            (+ days-in-first-month days-in-prev-month))]
     (cond
       (and (= m 1) (= d 14)) pesach
+      (and (= m 1) (<= 15 d 21) (= dow 1)) (yom-bikkurim d)
       (and (= m 1) (= d 15)) (ha-matzot 1)
-      (and (= m 1) (<= 16 d 21) (= dow 1)) yom-bikkurim
       (and (= m 1) (= d 16)) (ha-matzot 2)
       (and (= m 1) (= d 17)) (ha-matzot 3)
       (and (= m 1) (= d 18)) (ha-matzot 4)
       (and (= m 1) (= d 19)) (ha-matzot 5)
       (and (= m 1) (= d 20)) (ha-matzot 6)
       (and (= m 1) (= d 21)) (ha-matzot 7)
-      (and (= two-first-months 58) (= m 3) (<= 7 d 12) (= dow 1)) shavuot
-      (and (= two-first-months 59) (= m 3) (<= 6 d 11) (= dow 1)) shavuot
-      (and (= two-first-months 60) (= m 3) (<= 5 d 10) (= dow 1)) shavuot
+      (and (= two-first-months 58) (= m 3) (<= 6 d 12) (= dow 1)) shavuot
+      (and (= two-first-months 59) (= m 3) (<= 5 d 11) (= dow 1)) shavuot
+      (and (= two-first-months 60) (= m 3) (<= 4 d 10) (= dow 1)) shavuot
       (and (= m 7) (= d 1)) yom-teruah
       (and (= m 7) (= d 10)) yom-ha-kippurim
       (and (= m 7) (= d 15)) (ha-sukkot 1)
@@ -494,34 +499,37 @@
       (and (= m 7) (= d 20)) (ha-sukkot 6)
       (and (= m 7) (= d 21)) (ha-sukkot 7)
       (and (= m 7) (= d 22)) shemini-atzeret
-      (and (= m 9) (= d 25)) (chanukah 1)
-      (and (= m 9) (= d 26)) (chanukah 2)
-      (and (= m 9) (= d 27)) (chanukah 3)
-      (and (= m 9) (= d 28)) (chanukah 4)
-      (and (= m 9) (= d 29)) (chanukah 5)
-      (and (= m 9) (= d 30)) (chanukah 6)
-      (and (= m 10) (= d 1) (= days-in-prev-month 29)) (chanukah 6)
-      (and (= m 10) (= d 1) (= days-in-prev-month 30)) (chanukah 7)
-      (and (= m 10) (= d 2) (= days-in-prev-month 29)) (chanukah 7)
-      (and (= m 10) (= d 2) (= days-in-prev-month 30)) (chanukah 8)
-      (and (= m 10) (= d 3) (= days-in-prev-month 29)) (chanukah 8)
+      (and (= m 9) (= d 25)) (chanukah d 1)
+      (and (= m 9) (= d 26)) (chanukah d 2)
+      (and (= m 9) (= d 27)) (chanukah d 3)
+      (and (= m 9) (= d 28)) (chanukah d 4)
+      (and (= m 9) (= d 29)) (chanukah d 5)
+      (and (= m 9) (= d 30)) (chanukah d 6)
+      (and (= m 10) (= d 1) (= days-in-prev-month 29)) (chanukah d 6)
+      (and (= m 10) (= d 1) (= days-in-prev-month 30)) (chanukah d 7)
+      (and (= m 10) (= d 2) (= days-in-prev-month 29)) (chanukah d 7)
+      (and (= m 10) (= d 2) (= days-in-prev-month 30)) (chanukah d 8)
+      (and (= m 10) (= d 3) (= days-in-prev-month 29)) (chanukah d 8)
       (and (= m 12) (= d 14)) purim
       (and (= m 12) (= d 15)) shushan-purim
       :else false)))
 
 (defn- sabbath?
-  "Given the hebrew `month-of-year`, `day-of-month`, and `day-of-week`, return
-  `true` if it's a Sabbath or `false` if it's not."
-  [month-of-year day-of-month day-of-week feast-day]
+  "Given the hebrew `month-of-year`, `day-of-month`, `day-of-week`, and
+  `feast-days`,  return `true` if it's a Sabbath or `false` if it's not."
+  [month-of-year day-of-month day-of-week major-feast-day]
   (or (= 7 day-of-week)
-      (and (= month-of-year 1) (= day-of-month 15))                      ; "First day of the Feast of Unleavened Bread"
-      (and (= month-of-year 1) (= day-of-month 21))                      ; "Last day of the Feast of Unleavened Bread"
-      (and (= month-of-year 7) (= day-of-month 1))                       ; "Feast of Trumpets"
-      (and (= month-of-year 7) (= day-of-month 10))                      ; "Day of Atonement"
-      (and (= month-of-year 7) (= day-of-month 15))                      ; "First day of the Feast of Tabernacles"
-      (and (= month-of-year 7) (= day-of-month 22))                      ; "The Last Great Day"
-      (= "Feast of First Fruits" (:name feast-day))
-      (= "Feast of Weeks" (:name feast-day))))
+      (and (= month-of-year 1) (= day-of-month 15)) ; "First day of the Feast of
+                                                    ;  Unleavened Bread"
+      (and (= month-of-year 1) (= day-of-month 21)) ; "Last day of the Feast of
+                                                    ;  Unleavened Bread"
+      (and (= month-of-year 7) (= day-of-month 1))  ; "Feast of Trumpets"
+      (and (= month-of-year 7) (= day-of-month 10)) ; "Day of Atonement"
+      (and (= month-of-year 7) (= day-of-month 15)) ; "First day of the Feast of
+                                                    ;  Tabernacles"
+      (and (= month-of-year 7) (= day-of-month 22)) ; "The Last Great Day"
+      (and major-feast-day (= "Feast of First Fruits" (:name major-feast-day)))
+      (and major-feast-day (= "Feast of Weeks" (:name major-feast-day)))))
 
 (defn- polar-adjusted?
   [lat lon date]
@@ -533,8 +541,9 @@
 
 (defn- assoc-polar-status
   [lat lon m]
-  (assoc m :start-adjusted-for-polar-region (polar-adjusted? lat lon (:start m))
-           :end-adjusted-for-polar-region (polar-adjusted? lat lon (:end m))))
+  (assoc m
+    :start-adjusted-for-polar-region (polar-adjusted? lat lon (:start m))
+    :end-adjusted-for-polar-region (polar-adjusted? lat lon (:end m))))
 
 (defn- with-polar-status
   [lat lon m]
@@ -589,32 +598,39 @@
          end-of-week (last week-boundaries)
          start-of-day (first day-boundaries)
          end-of-day (last day-boundaries)
+         days-in-month (days-between start-of-month end-of-month),
          days-in-year (days-between start-of-year end-of-year)
          months-in-year (if (<= 383 days-in-year 384) 13 12)
          month (month lat lon date)
          dom (day-of-month lat lon date)
          dow (day-of-week lat lon date)
-         feast-day (feast-day? month dom dow start-of-year start-of-month)
-         sabbath (sabbath? month dom dow feast-day)]
-     {:hebrew {:month-of-year month
-               :months-in-year months-in-year
-               :day-of-month dom
-               :days-in-month (days-between start-of-month end-of-month)
-               :day-of-week dow
-               :sabbath sabbath
-               :feast-day feast-day
-               :names {:month-of-year (nth month-numbers (dec month))
-                       :traditional-month-of-year
-                       (if (and (= month 12) (= months-in-year 13))
-                         "Adar I"
-                         (nth traditional-month-names (dec month)))
-                       :day-of-month (nth day-numbers (dec dom))
-                       :day-of-week (nth weekday-names (dec dow))}}
-      :time (with-polar-status lat lon
-              {:year {:start start-of-year :end end-of-year}
-               :month {:start start-of-month :end end-of-month}
-               :week {:start start-of-week :end end-of-week}
-               :day {:start start-of-day :end end-of-day}})}))
+         names {:month-of-year (nth month-numbers (dec month)),
+                :traditional-month-of-year
+                  (if (and (= month 12) (= months-in-year 13))
+                    "Adar I"
+                    (nth traditional-month-names (dec month))),
+                :day-of-month (nth day-numbers (dec dom)),
+                :day-of-week (nth weekday-names (dec dow))}
+         minor-feast-day (minor-feast-day? month dom)
+         major-feast-day (major-feast-day? month dom dow start-of-year
+                                                    start-of-month)
+         sabbath (sabbath? month dom dow major-feast-day)]
+     {:hebrew {:month-of-year month,
+               :months-in-year months-in-year,
+               :day-of-month dom,
+               :days-in-month days-in-month,
+               :day-of-week dow,
+               :sabbath sabbath,
+               :minor-feast-day minor-feast-day,
+               :major-feast-day major-feast-day,
+               :names names},
+      :time (with-polar-status lat
+                               lon
+                               {:year {:start start-of-year, :end end-of-year},
+                                :month {:start start-of-month,
+                                        :end end-of-month},
+                                :week {:start start-of-week, :end end-of-week},
+                                :day {:start start-of-day, :end end-of-day}})}))
   ([lat lon]
    {:pre [(and (number? lat) (<= -90 lat 90))
           (and (number? lon) (<= -180 lon 180))]}
@@ -625,8 +641,7 @@
                    (t/offset-date-time date))
                (<= 1584 (t/as date :year) 2100))]}
    (hebrew-date jerusalem-lat jerusalem-lon date))
-  ([]
-   (hebrew-date (zone-it jerusalem-tz (now)))))
+  ([] (hebrew-date (zone-it jerusalem-tz (now)))))
 
 (defn find-date
   "Return a map containing the details of a `hebrew-date` where:
@@ -660,27 +675,22 @@
 
   See also `hebrew-date`, `zone-it`, and `now`."
   ([lat lon m d date]
-   {:pre [(and (pos-int? m) (< 0 m 14))
-          (and (pos-int? d) (< 0 d 31))]}
+   {:pre [(and (pos-int? m) (< 0 m 14)) (and (pos-int? d) (< 0 d 31))]}
    (let [months (start-of-months-in-year lat lon date)
-         start-of-month (try
-                          (nth months (dec m))
-                          (catch IndexOutOfBoundsException _e nil))
+         start-of-month (try (nth months (dec m))
+                             (catch IndexOutOfBoundsException _e nil))
          days (when start-of-month
                 (->> start-of-month
                      (go-forward (t/hours 1))
                      (start-of-days-in-month lat lon)))]
      (when days
-       (try
-         (->> (dec d)
-              (nth days)
-              (go-forward (t/hours 1))
-              (hebrew-date lat lon))
-         (catch IndexOutOfBoundsException _e nil)))))
-  ([m d date]
-   (find-date jerusalem-lat jerusalem-lon m d date))
-  ([m d]
-   (find-date m d (zone-it jerusalem-tz (now)))))
+       (try (->> (dec d)
+                 (nth days)
+                 (go-forward (t/hours 1))
+                 (hebrew-date lat lon))
+            (catch IndexOutOfBoundsException _e nil)))))
+  ([m d date] (find-date jerusalem-lat jerusalem-lon m d date))
+  ([m d] (find-date m d (zone-it jerusalem-tz (now)))))
 
 (defn find-date-in-year
   "Return a map containing the details of a `hebrew-date` where:
@@ -711,12 +721,93 @@
 
   See also `find-date`."
   ([lat lon tz y m d]
-   {:pre [(string? tz)
-          (and (pos-int? y) (<= 1584 y 2200))
-          (and (pos-int? m) (< 0 m 14))
-          (and (pos-int? d) (< 0 d 31))]}
+   {:pre [(string? tz) (and (pos-int? y) (<= 1584 y 2200))
+          (and (pos-int? m) (< 0 m 14)) (and (pos-int? d) (< 0 d 31))]}
    (find-date lat lon m d (make-zoned-date tz y 6 1 12)))
-  ([tz y m d]
-   (find-date-in-year jerusalem-lat jerusalem-lon tz y m d))
-  ([y m d]
-   (find-date-in-year jerusalem-tz y m d)))
+  ([tz y m d] (find-date-in-year jerusalem-lat jerusalem-lon tz y m d))
+  ([y m d] (find-date-in-year jerusalem-tz y m d)))
+
+;; The following functions were used to calculate the feast days for
+;; `calculated-feast-days`. They're terribly slow and shouldn't be used
+;; for any other purpose. I'm leaving them here for future reference and if I
+;; have to re-generate the dates due to a change in the calculation method or
+;; future bug fix.
+(def potential-feast-dates
+  (->> (concat (map #(vector 1 %) (range 14 22))
+               (map #(vector 3 %) (range 5 13))
+               [[7 1] [7 10]]
+               (map #(vector 7 %) (range 15 23))
+               (map #(vector 9 %) (range 25 31))
+               (map #(vector 10 %) (range 1 4))
+               [[12 14] [12 15]]
+               (map #(vector % 1) (range 1 14)))
+       (sort)
+       (dedupe)))
+
+(defn- calculate-feast-days-in-gregorian-year
+  [year]
+  (->> (for [y [(dec year) year]
+             p potential-feast-dates]
+         (find-date-in-year y (first p) (last p)))
+       (filter #(or (get-in % [:hebrew :minor-feast-day])
+                    (get-in % [:hebrew :major-feast-day])))
+       (pmap #(vector (t/as (get-in % [:time :day :start])
+                            :year
+                            :month-of-year
+                            :day-of-month)
+                      (get-in % [:hebrew :minor-feast-day])
+                      (get-in % [:hebrew :major-feast-day])))
+       (map #(remove false? %))
+       (filter #(= (ffirst %) year))
+       (sort-by #(second (first %)))))
+
+(defn- map-of-feast-days-in-gregorian-year
+  [year]
+  (let [dates (calculate-feast-days-in-gregorian-year year)]
+    (as-> (for [d dates]
+            {(second (first d)) {(last (first d)) (into [] (rest d))}}) <>
+      (apply merge-with into <>)
+      {year <>})))
+
+(defn- feast-days-in-range-of-gregorian-years
+  [start end]
+  (->> (range start (inc end))
+       (map map-of-feast-days-in-gregorian-year)
+       (apply merge)
+       (into (sorted-map))))
+
+(def feast-day-numbers
+  ["First" "Second" "Third" "Fourth" "Fifth" "Sixth" "Last"])
+
+(defn- long-feast-day-name
+  [y m d n day-of-feast days-in-feast]
+  (str y "-" (format "%02d" m) "-" (format "%02d" d) " "
+       (if (< days-in-feast 3)
+         n
+         (if (= days-in-feast 8)
+           (cond (= 7 day-of-feast) (str "Seventh day of " n)
+                 (= 8 day-of-feast) (str "Last day of " n)
+                 :else
+                 (str (nth feast-day-numbers (dec day-of-feast))
+                      " day of " n))
+           (str (nth feast-day-numbers (dec day-of-feast))
+                " day of the "
+                n)))))
+
+(defn list-of-known-feast-days-in-gregorian-year
+  "Given a gregorian `year`, return a list of strings describing the feast days
+  in that year. The dates represent the gregorian day on which the sunset would
+  begin the feast day in question. Some days will have more than one feast day."
+  ([year coll]
+   (let [y (get coll year)]
+     (sort (for [m (keys y)
+                 d (keys (get y m))
+                 f (get-in y [m d])]
+             (let [n (:name f)
+                   day-of-feast (:day-of-feast f)
+                   days-in-feast (:days-in-feast f)]
+               (long-feast-day-name year m d n day-of-feast days-in-feast))))))
+  ([year]
+   {:pre [(number? year)
+          (<= 2020 year 2039)]}
+   (list-of-known-feast-days-in-gregorian-year year calculated-feast-days)))
