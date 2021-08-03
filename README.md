@@ -25,7 +25,8 @@ Examples:
   :days-in-month 29,
   :day-of-week 5,
   :sabbath false,
-  :feast-day false,
+  :major-feast-day false,
+  :minor-feast-day false,
   :names
   {:month-of-year "5th",
    :traditional-month-of-year "Av",
@@ -72,8 +73,9 @@ Examples:
   :days-in-month 30,
   :day-of-week 7,
   :sabbath true,
-  :feast-day
+  :major-feast-day
   {:name "Passover", :hebrew-name "Pesach", :day-of-feast 1, :days-in-feast 1},
+  :minor-feast-day false,
   :names
   {:month-of-year "1st",
    :traditional-month-of-year "Nisan",
