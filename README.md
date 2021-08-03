@@ -118,6 +118,50 @@ Examples:
    :end-adjusted-for-polar-region false}}}
 ```
 
+`list-of-known-feast-days-in-gregorian-year` will list the dates on which holidays start
+at the sunset:
+``` clojure
+(l/list-of-known-feast-days-in-gregorian-year 2021)
+;; => 
+("2021-01-13 First day of Shevat"
+ "2021-02-12 First day of Adar"
+ "2021-02-25 Purim"
+ "2021-02-26 Shushan Purim"
+ "2021-03-13 First day of Adar II"
+ "2021-04-12 First day of Nisan"
+ "2021-04-25 Passover"
+ "2021-04-26 First day of the Feast of Unleavened Bread"
+ "2021-04-27 Second day of the Feast of Unleavened Bread"
+ "2021-04-28 Third day of the Feast of Unleavened Bread"
+ "2021-04-29 Fourth day of the Feast of Unleavened Bread"
+ "2021-04-30 Fifth day of the Feast of Unleavened Bread"
+ "2021-05-01 Feast of First Fruits"
+ "2021-05-02 Last day of the Feast of Unleavened Bread"
+ "2021-05-12 First day of Iyar"
+ "2021-06-10 First day of Sivan"
+ "2021-06-19 Feast of Weeks"
+ "2021-07-10 First day of Tammuz"
+ "2021-08-08 First day of Av"
+ "2021-09-07 First day of Elul"
+ "2021-10-06 Feast of Trumpets"
+ "2021-10-06 First day of Tishrei"
+ "2021-10-15 Day of Atonement"
+ "2021-10-20 First day of the Feast of Tabernacles"
+ "2021-10-21 Second day of the Feast of Tabernacles"
+ "2021-10-22 Third day of the Feast of Tabernacles"
+ "2021-10-23 Fourth day of the Feast of Tabernacles"
+ "2021-10-24 Fifth day of the Feast of Tabernacles"
+ "2021-10-25 Sixth day of the Feast of Tabernacles"
+ "2021-10-26 Last day of the Feast of Tabernacles"
+ "2021-10-27 The Last Great Day"
+ "2021-11-05 First day of Marcheshvan"
+ "2021-12-04 First day of Kislev"
+ "2021-12-28 First day of Hanukkah"
+ "2021-12-29 Second day of Hanukkah"
+ "2021-12-30 Third day of Hanukkah"
+ "2021-12-31 Fourth day of Hanukkah")
+```
+
 ## Background
 
 The Bible instructs believers to keep several Feasts, or *Moedim*. There 
