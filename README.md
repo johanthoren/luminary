@@ -3,6 +3,12 @@
 A Clojure library designed to provide date calculations based on the Bible and
 the 1st Book of Enoch.
 
+> And God said, Let there be **lights** in the firmament of the heaven to divide the day from the night; and let them be for signs, and for seasons, and for days, and years:
+>
+> And let them be for **lights** in the firmament of the heaven to give light upon the earth: and it was so.
+
+[Genesis 1:14-15](https://www.biblegateway.com/passage/?search=Genesis+1:14-15&version=KJV)
+
 ## Usage
 
 [![Clojars Project](https://img.shields.io/clojars/v/xyz.thoren/luminary.svg)](https://clojars.org/xyz.thoren/luminary)
