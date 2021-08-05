@@ -68,6 +68,9 @@
   ;; time of day one provides as date, even if the next time of sunset should
   ;; be the same.
   ;;
+  ;; A bug report has been filed upstream:
+  ;; https://github.com/shred/commons-suncalc/issues/30
+  ;;
   ;; To work around this, always ask for the time of sunset 1 hour before the
   ;; originally reported sunset.
   (->> (next-sunset lat lon date)
