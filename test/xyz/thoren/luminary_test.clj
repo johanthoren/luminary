@@ -23,18 +23,66 @@
                         (t/zoned-date-time year month day 12 0)
                         "UTC")))
 
+(deftest test-sunset-drift
+  (testing "that the same minute is always reported for the sunset"
+    (testing "in Sweden"
+      (let [r #(str (:sunset (#'xyz.thoren.luminary/next-sunset
+                              58 12 (#'xyz.thoren.luminary/make-zoned-date
+                                     "Europe/Stockholm" 2021 %1 %2 %3 0))))
+            t #(is (= %4 (r %1 %2 %3)))]
+        (testing "on June 6"
+          (doseq [h (range 0 22)]
+            (t 6 6 h "2021-06-06T22:08+02:00[Europe/Stockholm]")))
+        (testing "on August 8"
+          (doseq [h (range 0 22)]
+            (t 8 5 h "2021-08-05T21:20+02:00[Europe/Stockholm]")))
+        (testing "on December 20"
+          (doseq [h (range 0 16)]
+            (t 12 20 h "2021-12-20T15:23+01:00[Europe/Stockholm]")))))
+    (testing "in Anchorage"
+      (let [r #(str (:sunset (#'xyz.thoren.luminary/next-sunset
+                              anchorage-latitude anchorage-longitude
+                              (#'xyz.thoren.luminary/make-zoned-date
+                               "America/Anchorage" 2021 %1 %2 %3 0))))
+            t #(is (= %4 (r %1 %2 %3)))]
+        (testing "on May 10"
+          (doseq [h (range 0 23)]
+            (t 5 10 h "2021-05-10T22:29-08:00[America/Anchorage]")))
+        (testing "on June 6"
+          (doseq [h (range 0 24)]
+            (t 6 6 h "2021-06-06T23:29-08:00[America/Anchorage]")))
+        (testing "on December 20"
+          (doseq [h (range 0 16)]
+            (t 12 20 h "2021-12-20T15:43-09:00[America/Anchorage]")))))
+
+    (testing "in Puerto-Williams"
+      (let [r #(str (:sunset (#'xyz.thoren.luminary/next-sunset
+                              puerto-williams-latitude puerto-williams-longitude
+                              (#'xyz.thoren.luminary/make-zoned-date
+                               "Antarctica/Palmer" 2021 %1 %2 %3 0))))
+            t #(is (= %4 (r %1 %2 %3)))]
+        (testing "on May 10"
+          (doseq [h (range 0 18)]
+            (t 5 10 h "2021-05-10T17:44-03:00[Antarctica/Palmer]")))
+        (testing "on June 6"
+          (doseq [h (range 0 18)]
+            (t 6 6 h "2021-06-06T17:10-03:00[Antarctica/Palmer]")))
+        (testing "on December 20"
+          (doseq [h (range 0 23)]
+            (t 12 20 h "2021-12-20T22:09-03:00[Antarctica/Palmer]")))))))
+
 (deftest temple-mount
   (testing "sunrise and sunset at the Temple Mount"
     (let [lat tm-lat
           lon tm-lon
           r #(%1 lat lon %2 %3 %4)
           test-string #(is (= %5 (str (r %1 %2 %3 %4))))]
-      (test-string #'time-of-sunset 2021 1 1 "2021-01-01T14:46:28Z[UTC]")
-      (test-string #'time-of-sunset 2021 4 30 "2021-04-30T16:18:36Z[UTC]")
-      (test-string #'time-of-sunset 2021 6 22 "2021-06-22T16:47:58Z[UTC]")
-      (test-string #'time-of-sunset 2021 7 1 "2021-07-01T16:48:39Z[UTC]")
-      (test-string #'time-of-sunset 2021 11 11 "2021-11-11T14:42:05Z[UTC]")
-      (test-string #'time-of-sunset 2021 12 21 "2021-12-21T14:39:30Z[UTC]"))))
+      (test-string #'time-of-sunset 2021 1 1 "2021-01-01T14:46Z[UTC]")
+      (test-string #'time-of-sunset 2021 4 30 "2021-04-30T16:18Z[UTC]")
+      (test-string #'time-of-sunset 2021 6 22 "2021-06-22T16:48Z[UTC]")
+      (test-string #'time-of-sunset 2021 7 1 "2021-07-01T16:48Z[UTC]")
+      (test-string #'time-of-sunset 2021 11 11 "2021-11-11T14:42Z[UTC]")
+      (test-string #'time-of-sunset 2021 12 21 "2021-12-21T14:39Z[UTC]"))))
 
 (deftest arvidsjaur
   (testing "sunrise and sunset in Arvidsjaur, Sweden"
@@ -42,12 +90,12 @@
           lon arvidsjaur-longitude
           r #(%1 lat lon %2 %3 %4)
           test-string #(is (= %5 (str (r %1 %2 %3 %4))))]
-      (test-string #'time-of-sunset 2021 1 1 "2021-01-01T12:33:13Z[UTC]")
-      (test-string #'time-of-sunset 2021 4 30 "2021-04-30T19:16:10Z[UTC]")
-      (test-string #'time-of-sunset 2021 6 22 "2021-06-22T22:18:52Z[UTC]")
-      (test-string #'time-of-sunset 2021 7 1 "2021-07-01T21:56:32Z[UTC]")
+      (test-string #'time-of-sunset 2021 1 1 "2021-01-01T12:33Z[UTC]")
+      (test-string #'time-of-sunset 2021 4 30 "2021-04-30T19:16Z[UTC]")
+      (test-string #'time-of-sunset 2021 6 22 "2021-06-22T22:19Z[UTC]")
+      (test-string #'time-of-sunset 2021 7 1 "2021-07-01T21:56Z[UTC]")
       (test-string #'time-of-sunset 2021 11 11 "2021-11-11T13:42Z[UTC]")
-      (test-string #'time-of-sunset 2021 12 21 "2021-12-21T12:15:53Z[UTC]"))))
+      (test-string #'time-of-sunset 2021 12 21 "2021-12-21T12:16Z[UTC]"))))
 
 (deftest longyearbyen
   (testing "sunrise and sunset in Longyearbyen, Svalbard"
@@ -57,14 +105,14 @@
           test-string #(is (= %5 (str (r %1 %2 %3 %4))))]
       ;; The dates where one would expect no sunset are automatically adjusted
       ;; to be calculated at the latitude 65.7.
-      (test-string #'time-of-sunset 2021 1 1 "2021-01-01T12:45:36Z[UTC]")
-      (test-string #'time-of-sunset 2021 3 1 "2021-03-01T14:58:03Z[UTC]")
-      (test-string #'time-of-sunset 2021 4 30 "2021-04-30T19:31:49Z[UTC]")
-      (test-string #'time-of-sunset 2021 6 22 "2021-06-22T22:46:18Z[UTC]")
-      (test-string #'time-of-sunset 2021 7 1 "2021-07-01T22:16:29Z[UTC]")
-      (test-string #'time-of-sunset 2021 10 10 "2021-10-10T14:43:16Z[UTC]")
-      (test-string #'time-of-sunset 2021 11 11 "2021-11-11T13:55:39Z[UTC]")
-      (test-string #'time-of-sunset 2021 12 21 "2021-12-21T12:27:55Z[UTC]"))))
+      (test-string #'time-of-sunset 2021 1 1 "2021-01-01T12:45Z[UTC]")
+      (test-string #'time-of-sunset 2021 3 1 "2021-03-01T14:58Z[UTC]")
+      (test-string #'time-of-sunset 2021 4 30 "2021-04-30T19:32Z[UTC]")
+      (test-string #'time-of-sunset 2021 6 22 "2021-06-22T22:46Z[UTC]")
+      (test-string #'time-of-sunset 2021 7 1 "2021-07-01T22:16Z[UTC]")
+      (test-string #'time-of-sunset 2021 10 10 "2021-10-10T14:43Z[UTC]")
+      (test-string #'time-of-sunset 2021 11 11 "2021-11-11T13:55Z[UTC]")
+      (test-string #'time-of-sunset 2021 12 21 "2021-12-21T12:28Z[UTC]"))))
 
 (deftest puerto-williams
   (testing "sunrise and sunset in Puerto Williams, Chile"
@@ -72,12 +120,12 @@
           lon puerto-williams-longitude
           r #(%1 lat lon %2 %3 %4)
           test-string #(is (= %5 (str (r %1 %2 %3 %4))))]
-      (test-string #'time-of-sunset 2021 1 1 "2021-01-02T01:10:35Z[UTC]")
-      (test-string #'time-of-sunset 2021 4 30 "2021-04-30T21:04:03Z[UTC]")
-      (test-string #'time-of-sunset 2021 6 22 "2021-06-22T20:08:06Z[UTC]")
-      (test-string #'time-of-sunset 2021 7 1 "2021-07-01T20:13:06Z[UTC]")
-      (test-string #'time-of-sunset 2021 11 11 "2021-11-12T00:09:41Z[UTC]")
-      (test-string #'time-of-sunset 2021 12 21 "2021-12-22T01:09:46Z[UTC]"))))
+      (test-string #'time-of-sunset 2021 1 1 "2021-01-02T01:10Z[UTC]")
+      (test-string #'time-of-sunset 2021 4 30 "2021-04-30T21:04Z[UTC]")
+      (test-string #'time-of-sunset 2021 6 22 "2021-06-22T20:08Z[UTC]")
+      (test-string #'time-of-sunset 2021 7 1 "2021-07-01T20:13Z[UTC]")
+      (test-string #'time-of-sunset 2021 11 11 "2021-11-12T00:09Z[UTC]")
+      (test-string #'time-of-sunset 2021 12 21 "2021-12-22T01:09Z[UTC]"))))
 
 (deftest mcmurdo
   (testing "sunrise and sunset at McMurdo station, Antarctica"
@@ -87,31 +135,31 @@
           test-string #(is (= %5 (str (r %1 %2 %3 %4))))]
       ;; The dates where one would expect no sunset are automatically adjusted
       ;; to be calculated at the latitude -65.7.
-      (test-string #'time-of-sunset 2021 1 1 "2021-01-01T12:07:47Z[UTC]")
-      (test-string #'time-of-sunset 2021 3 1 "2021-03-02T09:45:49Z[UTC]")
-      (test-string #'time-of-sunset 2021 4 30 "2021-05-01T04:33:40Z[UTC]")
-      (test-string #'time-of-sunset 2021 6 22 "2021-06-23T02:27:26Z[UTC]")
-      (test-string #'time-of-sunset 2021 7 1 "2021-07-02T02:39:26Z[UTC]")
-      (test-string #'time-of-sunset 2021 10 10 "2021-10-11T09:23:33Z[UTC]")
-      (test-string #'time-of-sunset 2021 11 11 "2021-11-12T09:51:31Z[UTC]")
-      (test-string #'time-of-sunset 2021 12 21 "2021-12-21T12:41:45Z[UTC]"))))
+      (test-string #'time-of-sunset 2021 1 1 "2021-01-01T12:07Z[UTC]")
+      (test-string #'time-of-sunset 2021 3 1 "2021-03-02T09:46Z[UTC]")
+      (test-string #'time-of-sunset 2021 4 30 "2021-05-01T04:33Z[UTC]")
+      (test-string #'time-of-sunset 2021 6 22 "2021-06-23T02:27Z[UTC]")
+      (test-string #'time-of-sunset 2021 7 1 "2021-07-02T02:39Z[UTC]")
+      (test-string #'time-of-sunset 2021 10 10 "2021-10-11T09:23Z[UTC]")
+      (test-string #'time-of-sunset 2021 11 11 "2021-11-12T09:51Z[UTC]")
+      (test-string #'time-of-sunset 2021 12 21 "2021-12-21T12:42Z[UTC]"))))
 
 (deftest new-moons
   (testing "time of new moons 2021"
     (let [t #(is (= %2 (str (#'xyz.thoren.luminary/next-new-moon
                              (#'xyz.thoren.luminary/make-utc-date 2021 %1 1)))))]
-      (t 1 "2021-01-13T05:00:46Z[UTC]")
-      (t 2 "2021-02-11T19:07:59Z[UTC]")
-      (t 3 "2021-03-13T10:24:21Z[UTC]")
-      (t 4 "2021-04-12T02:31:54Z[UTC]")
-      (t 5 "2021-05-11T19:00:26Z[UTC]")
-      (t 6 "2021-06-10T10:56:23Z[UTC]")
+      (t 1 "2021-01-13T05:00Z[UTC]")
+      (t 2 "2021-02-11T19:07Z[UTC]")
+      (t 3 "2021-03-13T10:24Z[UTC]")
+      (t 4 "2021-04-12T02:31Z[UTC]")
+      (t 5 "2021-05-11T19:00Z[UTC]")
+      (t 6 "2021-06-10T10:56Z[UTC]")
       (t 7 "2021-07-10T01:22Z[UTC]")
-      (t 8 "2021-08-08T13:53:58Z[UTC]")
-      (t 9 "2021-09-07T00:54:59Z[UTC]")
-      (t 10 "2021-10-06T11:10:29Z[UTC]")
-      (t 11 "2021-11-04T21:20:29Z[UTC]")
-      (t 12 "2021-12-04T07:46:09Z[UTC]"))))
+      (t 8 "2021-08-08T13:53Z[UTC]")
+      (t 9 "2021-09-07T00:54Z[UTC]")
+      (t 10 "2021-10-06T11:10Z[UTC]")
+      (t 11 "2021-11-04T21:20Z[UTC]")
+      (t 12 "2021-12-04T07:46Z[UTC]"))))
 
 (deftest next-new-year-in-israel
   (testing "the time of the previous new year in Israel"
@@ -119,16 +167,16 @@
                     (str (#'xyz.thoren.luminary/next-start-of-year-in-israel
                           (#'xyz.thoren.luminary/make-zoned-date "Asia/Jerusalem"
                                         %1 (+ 5 (rand-int 8)) 1 1)))))]
-      (t 2018 "2019-04-05T19:01:05+03:00[Asia/Jerusalem]")
-      (t 2019 "2020-03-24T17:53:33+02:00[Asia/Jerusalem]")
-      (t 2020 "2021-04-12T19:06:09+03:00[Asia/Jerusalem]")
-      (t 2021 "2022-04-01T18:58:35+03:00[Asia/Jerusalem]")
-      (t 2022 "2023-03-22T17:51:42+02:00[Asia/Jerusalem]")
-      (t 2023 "2024-04-09T19:04:18+03:00[Asia/Jerusalem]")
-      (t 2024 "2025-03-29T18:56:46+03:00[Asia/Jerusalem]")
-      (t 2025 "2026-04-17T19:09:25+03:00[Asia/Jerusalem]")
-      (t 2026 "2027-04-07T19:02:28+03:00[Asia/Jerusalem]")
-      (t 2027 "2028-03-26T18:54:56+03:00[Asia/Jerusalem]"))))
+      (t 2018 "2019-04-05T19:01+03:00[Asia/Jerusalem]")
+      (t 2019 "2020-03-24T17:53+02:00[Asia/Jerusalem]")
+      (t 2020 "2021-04-12T19:06+03:00[Asia/Jerusalem]")
+      (t 2021 "2022-04-01T18:58+03:00[Asia/Jerusalem]")
+      (t 2022 "2023-03-22T17:51+02:00[Asia/Jerusalem]")
+      (t 2023 "2024-04-09T19:04+03:00[Asia/Jerusalem]")
+      (t 2024 "2025-03-29T18:56+03:00[Asia/Jerusalem]")
+      (t 2025 "2026-04-17T19:09+03:00[Asia/Jerusalem]")
+      (t 2026 "2027-04-07T19:02+03:00[Asia/Jerusalem]")
+      (t 2027 "2028-03-26T18:54+03:00[Asia/Jerusalem]"))))
 
 (deftest previous-new-year-in-israel
   (testing "the time of the previous new year in Israel"
@@ -136,16 +184,16 @@
                     (str (#'xyz.thoren.luminary/previous-start-of-year-in-israel
                           (#'xyz.thoren.luminary/make-zoned-date "Asia/Jerusalem"
                                         %1 (+ 5 (rand-int 8)) 22 12)))))]
-      (t 2019 "2019-04-05T19:01:05+03:00[Asia/Jerusalem]")
-      (t 2020 "2020-03-24T17:53:33+02:00[Asia/Jerusalem]")
-      (t 2021 "2021-04-12T19:06:09+03:00[Asia/Jerusalem]")
-      (t 2022 "2022-04-01T18:58:35+03:00[Asia/Jerusalem]")
-      (t 2023 "2023-03-22T17:51:42+02:00[Asia/Jerusalem]")
-      (t 2024 "2024-04-09T19:04:18+03:00[Asia/Jerusalem]")
-      (t 2025 "2025-03-29T18:56:46+03:00[Asia/Jerusalem]")
-      (t 2026 "2026-04-17T19:09:25+03:00[Asia/Jerusalem]")
-      (t 2027 "2027-04-07T19:02:28+03:00[Asia/Jerusalem]")
-      (t 2028 "2028-03-26T18:54:56+03:00[Asia/Jerusalem]"))))
+      (t 2019 "2019-04-05T19:01+03:00[Asia/Jerusalem]")
+      (t 2020 "2020-03-24T17:53+02:00[Asia/Jerusalem]")
+      (t 2021 "2021-04-12T19:06+03:00[Asia/Jerusalem]")
+      (t 2022 "2022-04-01T18:58+03:00[Asia/Jerusalem]")
+      (t 2023 "2023-03-22T17:51+02:00[Asia/Jerusalem]")
+      (t 2024 "2024-04-09T19:04+03:00[Asia/Jerusalem]")
+      (t 2025 "2025-03-29T18:56+03:00[Asia/Jerusalem]")
+      (t 2026 "2026-04-17T19:09+03:00[Asia/Jerusalem]")
+      (t 2027 "2027-04-07T19:02+03:00[Asia/Jerusalem]")
+      (t 2028 "2028-03-26T18:54+03:00[Asia/Jerusalem]"))))
 
 (deftest temple-mount-previous-start-of-month
   (testing "that the correct start of month is calculated"
@@ -156,10 +204,10 @@
                           lat lon (t/with-zone
                                     (t/zoned-date-time %1 %2 %3 %4 %5 0 0 0)
                                     "Asia/Jerusalem")))))]
-      (t 2021 7 10 1 20 "2021-06-10T19:44:16+03:00[Asia/Jerusalem]")
-      (t 2021 7 10 19 50 "2021-07-10T19:47:20+03:00[Asia/Jerusalem]")
-      (t 2021 12 4 6 35 "2021-11-05T16:46:18+02:00[Asia/Jerusalem]")
-      (t 2021 12 4 7 47 "2021-11-05T16:46:18+02:00[Asia/Jerusalem]"))))
+      (t 2021 7 10 1 20 "2021-06-10T19:44+03:00[Asia/Jerusalem]")
+      (t 2021 7 10 19 50 "2021-07-10T19:47+03:00[Asia/Jerusalem]")
+      (t 2021 12 4 6 35 "2021-11-05T16:46+02:00[Asia/Jerusalem]")
+      (t 2021 12 4 7 47 "2021-11-05T16:46+02:00[Asia/Jerusalem]"))))
 
 (deftest temple-mount-next-start-of-year
   (testing "that the correct start of month is calculated"
@@ -168,7 +216,7 @@
                           tm-lat tm-lon
                           (#'xyz.thoren.luminary/make-zoned-date
                            "Asia/Jerusalem" %1 %2 %3 %4 %5)))))]
-      (t 2021 3 20 12 0 "2021-04-12T19:06:09+03:00[Asia/Jerusalem]"))))
+      (t 2021 3 20 12 0 "2021-04-12T19:06+03:00[Asia/Jerusalem]"))))
 
 (deftest arvidsjaur-previous-start-of-month
   (testing "that the correct start of month is calculated"
@@ -179,11 +227,11 @@
                           lat lon (t/with-zone
                                     (t/zoned-date-time %1 %2 %3 %4 %5 0 0 0)
                                     "Europe/Stockholm")))))]
-      (t 2021 7 10 1 20 "2021-06-10T23:54:02+02:00[Europe/Stockholm]")
-      (t 2021 7 10 19 50 "2021-06-10T23:54:02+02:00[Europe/Stockholm]")
-      (t 2021 12 4 6 35 "2021-11-05T15:02:39+01:00[Europe/Stockholm]")
-      (t 2021 12 4 7 47 "2021-11-05T15:02:39+01:00[Europe/Stockholm]")
-      (t 2021 12 4 23 0 "2021-12-04T13:33:55+01:00[Europe/Stockholm]"))))
+      (t 2021 7 10 1 20 "2021-06-10T23:54+02:00[Europe/Stockholm]")
+      (t 2021 7 10 19 50 "2021-06-10T23:54+02:00[Europe/Stockholm]")
+      (t 2021 12 4 6 35 "2021-11-05T15:02+01:00[Europe/Stockholm]")
+      (t 2021 12 4 7 47 "2021-11-05T15:02+01:00[Europe/Stockholm]")
+      (t 2021 12 4 23 0 "2021-12-04T13:33+01:00[Europe/Stockholm]"))))
 
 (deftest puerto-williams-previous-start-of-month
   (testing "that the correct start of month is calculated"
@@ -193,11 +241,11 @@
                     (str (#'xyz.thoren.luminary/previous-start-of-month
                           lat lon (#'xyz.thoren.luminary/make-zoned-date
                                     "Antarctica/Palmer" %1 %2 %3 %4 %5 0 0 0)))))]
-      (t 2021 7 10 1 20 "2021-06-10T17:08:27-03:00[Antarctica/Palmer]")
-      (t 2021 7 10 19 50 "2021-07-10T17:22:02-03:00[Antarctica/Palmer]")
-      (t 2021 12 4 6 35 "2021-11-05T20:57:08-03:00[Antarctica/Palmer]")
-      (t 2021 12 4 7 47 "2021-11-05T20:57:08-03:00[Antarctica/Palmer]")
-      (t 2021 12 4 23 0 "2021-12-04T21:52:31-03:00[Antarctica/Palmer]"))))
+      (t 2021 7 10 1 20 "2021-06-10T17:08-03:00[Antarctica/Palmer]")
+      (t 2021 7 10 19 50 "2021-07-10T17:22-03:00[Antarctica/Palmer]")
+      (t 2021 12 4 6 35 "2021-11-05T20:57-03:00[Antarctica/Palmer]")
+      (t 2021 12 4 7 47 "2021-11-05T20:57-03:00[Antarctica/Palmer]")
+      (t 2021 12 4 23 0 "2021-12-04T21:52-03:00[Antarctica/Palmer]"))))
 
 (deftest anchorage-previous-start-of-month
   (testing "that the correct start of month is calculated"
@@ -207,11 +255,11 @@
                     (str (#'xyz.thoren.luminary/previous-start-of-month
                           lat lon (#'xyz.thoren.luminary/make-zoned-date
                                     "America/Anchorage" %1 %2 %3 %4 %5 0 0 0)))))]
-      (t 2021 7 10 1 20 "2021-06-10T23:34:30-08:00[America/Anchorage]")
-      (t 2021 7 10 23 50 "2021-07-10T23:25:49-08:00[America/Anchorage]")
-      (t 2021 12 4 6 35 "2021-11-05T17:46:48-08:00[America/Anchorage]")
-      (t 2021 12 4 7 47 "2021-11-05T17:46:48-08:00[America/Anchorage]")
-      (t 2021 12 4 23 0 "2021-12-04T15:48:41-09:00[America/Anchorage]"))))
+      (t 2021 7 10 1 20 "2021-06-10T23:34-08:00[America/Anchorage]")
+      (t 2021 7 10 23 50 "2021-07-10T23:26-08:00[America/Anchorage]")
+      (t 2021 12 4 6 35 "2021-11-05T17:46-08:00[America/Anchorage]")
+      (t 2021 12 4 7 47 "2021-11-05T17:46-08:00[America/Anchorage]")
+      (t 2021 12 4 23 0 "2021-12-04T15:48-09:00[America/Anchorage]"))))
 
 (deftest days-in-month-at-temple-mount
   (testing "the properties of the list of days of a given month"
@@ -222,11 +270,11 @@
               m (range 1 13)]
         (let [r (t y m 1 12 0)]
           (is (apply distinct? (map #(t/as % :month-of-year :day-of-month) r)))))
-      (is (some #(= "2021-10-24T14:57:08Z[UTC]" %)
+      (is (some #(= "2021-10-24T14:57Z[UTC]" %)
                 (map str (#'xyz.thoren.luminary/start-of-days-in-month
                           tm-lat tm-lon
                           (#'xyz.thoren.luminary/make-utc-date 2021 10 27 23)))))
-      (is (some #(= "2021-11-03T14:47:54Z[UTC]" %)
+      (is (some #(= "2021-11-03T14:48Z[UTC]" %)
                 (map str (#'xyz.thoren.luminary/start-of-days-in-month
                           tm-lat tm-lon
                           (#'xyz.thoren.luminary/make-utc-date 2021 10 27 23))))))))
@@ -237,7 +285,7 @@
               tm-lat tm-lon
               (apply #'xyz.thoren.luminary/make-zoned-date "Asia/Jerusalem" %&))
           t #(is (= %6 (str (r %1 %2 %3 %4 %5))))]
-      (t 2021 4 5 16 4 "2021-04-10T19:04:48+03:00[Asia/Jerusalem]"))))
+      (t 2021 4 5 16 4 "2021-04-10T19:04+03:00[Asia/Jerusalem]"))))
 
 (deftest compare-next-start-of
   (let [date (#'xyz.thoren.luminary/make-zoned-date "Asia/Jerusalem" 2021 7 10 19 50)]
@@ -272,11 +320,11 @@
                (is (= %1 (get-in h [:hebrew :month-of-year])))
                (is (= %2 (get-in h [:hebrew :day-of-month]))))]
       (testing "for the first day of the year"
-        (t 1 1 2021 5 1 12 "2021-04-12T19:06:09+03:00[Asia/Jerusalem]"))
+        (t 1 1 2021 5 1 12 "2021-04-12T19:06+03:00[Asia/Jerusalem]"))
       (testing "for the second day of the year"
-        (t 1 2 2021 5 1 12 "2021-04-13T19:06:50+03:00[Asia/Jerusalem]"))
+        (t 1 2 2021 5 1 12 "2021-04-13T19:06+03:00[Asia/Jerusalem]"))
       (testing "for the third day of the 12th month"
-        (t 12 3 2021 5 1 12 "2022-03-05T17:39:52+02:00[Asia/Jerusalem]")))))
+        (t 12 3 2021 5 1 12 "2022-03-05T17:39+02:00[Asia/Jerusalem]")))))
 
 (deftest find-the-correct-date-in-year-2021
   (testing "that the correct start of day is returned"
@@ -286,13 +334,13 @@
                (is (= %2 (get-in h [:hebrew :month-of-year])))
                (is (= %3 (get-in h [:hebrew :day-of-month]))))]
       (testing "for the first day of the year"
-        (t 2021 1 1 "2021-04-12T19:06:09+03:00[Asia/Jerusalem]"))
+        (t 2021 1 1 "2021-04-12T19:06+03:00[Asia/Jerusalem]"))
       (testing "for the second day of the year"
-        (t 2021 1 2 "2021-04-13T19:06:50+03:00[Asia/Jerusalem]"))
+        (t 2021 1 2 "2021-04-13T19:06+03:00[Asia/Jerusalem]"))
       (testing "for the third day of the fourth month"
-        (t 2021 4 3 "2021-07-12T19:46:46+03:00[Asia/Jerusalem]"))
+        (t 2021 4 3 "2021-07-12T19:46+03:00[Asia/Jerusalem]"))
       (testing "for the third day of the 12th month"
-        (t 2021 12 3 "2022-03-05T17:39:52+02:00[Asia/Jerusalem]")))))
+        (t 2021 12 3 "2022-03-05T17:39+02:00[Asia/Jerusalem]")))))
 
 (deftest find-the-correct-date-in-year-2031
   (testing "that the correct start of day is returned"
@@ -302,13 +350,13 @@
                (is (= %2 (get-in h [:hebrew :month-of-year])))
                (is (= %3 (get-in h [:hebrew :day-of-month]))))]
       (testing "for the first day of the year"
-        (t 2031 1 1 "2031-03-23T17:52:25+02:00[Asia/Jerusalem]"))
+        (t 2031 1 1 "2031-03-23T17:52+02:00[Asia/Jerusalem]"))
       (testing "for the second day of the year"
-        (t 2031 1 2 "2031-03-24T17:53:05+02:00[Asia/Jerusalem]"))
+        (t 2031 1 2 "2031-03-24T17:53+02:00[Asia/Jerusalem]"))
       (testing "for the third day of the fourth month"
-        (t 2031 4 3 "2031-06-22T19:47:54+03:00[Asia/Jerusalem]"))
+        (t 2031 4 3 "2031-06-22T19:47+03:00[Asia/Jerusalem]"))
       (testing "for the third day of the 12th month"
-        (t 2031 12 3 "2032-02-13T17:23:32+02:00[Asia/Jerusalem]")))))
+        (t 2031 12 3 "2032-02-13T17:23+02:00[Asia/Jerusalem]")))))
 
 (deftest try-finding-a-bad-date-in-year
   (testing "that nothing is returned"

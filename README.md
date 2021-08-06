@@ -25,46 +25,46 @@ Examples:
 (l/find-date 5 11)
 ;; => 
 {:hebrew
- {:month-of-year 5,
-  :months-in-year 12,
-  :day-of-month 11,
-  :days-in-month 29,
+ {:days-in-month 29,
   :day-of-week 5,
-  :sabbath false,
-  :major-feast-day false,
+  :month-of-year 5,
   :minor-feast-day false,
+  :day-of-month 11,
+  :major-feast-day false,
+  :sabbath false,
   :names
   {:month-of-year "5th",
    :traditional-month-of-year "Av",
    :day-of-month "11th",
-   :day-of-week "5th day of the week"}},
+   :day-of-week "5th day of the week"},
+  :months-in-year 12},
  :time
  {:year
   {:start
-   #object[java.time.ZonedDateTime 0x7cb6ce48 "2021-04-12T19:06:09+03:00[Asia/Jerusalem]"],
+   #object[java.time.ZonedDateTime 0x2460f316 "2021-04-12T19:06+03:00[Asia/Jerusalem]"],
    :end
-   #object[java.time.ZonedDateTime 0x1ad646a6 "2022-04-01T18:58:34+03:00[Asia/Jerusalem]"],
+   #object[java.time.ZonedDateTime 0x3c371f7d "2022-04-01T18:57:59+03:00[Asia/Jerusalem]"],
    :start-adjusted-for-polar-region false,
    :end-adjusted-for-polar-region false},
   :month
   {:start
-   #object[java.time.ZonedDateTime 0x107e0c2f "2021-08-08T19:29:36+03:00[Asia/Jerusalem]"],
+   #object[java.time.ZonedDateTime 0x6dab6622 "2021-08-08T19:29+03:00[Asia/Jerusalem]"],
    :end
-   #object[java.time.ZonedDateTime 0xdfae2ea "2021-09-07T18:55:23+03:00[Asia/Jerusalem]"],
+   #object[java.time.ZonedDateTime 0x58df97d4 "2021-09-07T18:54:59+03:00[Asia/Jerusalem]"],
    :start-adjusted-for-polar-region false,
    :end-adjusted-for-polar-region false},
   :week
   {:start
-   #object[java.time.ZonedDateTime 0x5b64f5e5 "2021-08-14T19:23:43+03:00[Asia/Jerusalem]"],
+   #object[java.time.ZonedDateTime 0x6e7ec90a "2021-08-14T19:23+03:00[Asia/Jerusalem]"],
    :end
-   #object[java.time.ZonedDateTime 0x2b8b08e0 "2021-08-21T19:16:08+03:00[Asia/Jerusalem]"],
+   #object[java.time.ZonedDateTime 0x2ead9123 "2021-08-21T19:15:59+03:00[Asia/Jerusalem]"],
    :start-adjusted-for-polar-region false,
    :end-adjusted-for-polar-region false},
   :day
   {:start
-   #object[java.time.ZonedDateTime 0x40cb74e6 "2021-08-18T19:19:29+03:00[Asia/Jerusalem]"],
+   #object[java.time.ZonedDateTime 0x2272350f "2021-08-18T19:19+03:00[Asia/Jerusalem]"],
    :end
-   #object[java.time.ZonedDateTime 0x7d91e763 "2021-08-19T19:18:22+03:00[Asia/Jerusalem]"],
+   #object[java.time.ZonedDateTime 0xc320d03 "2021-08-19T19:17:59+03:00[Asia/Jerusalem]"],
    :start-adjusted-for-polar-region false,
    :end-adjusted-for-polar-region false}}}
 ```
@@ -73,47 +73,50 @@ Examples:
 (l/find-date-in-year 78.2253587 15.4878901 "Europe/Oslo" 2025 1 14)
 ;; => 
 {:hebrew
- {:month-of-year 1,
-  :months-in-year 13,
-  :day-of-month 14,
-  :days-in-month 30,
+ {:days-in-month 30,
   :day-of-week 7,
-  :sabbath true,
-  :major-feast-day
-  {:name "Passover", :hebrew-name "Pesach", :day-of-feast 1, :days-in-feast 1},
+  :month-of-year 1,
   :minor-feast-day false,
+  :day-of-month 14,
+  :major-feast-day
+  {:name "Passover",
+   :hebrew-name "Pesach",
+   :day-of-feast 1,
+   :days-in-feast 1},
+  :sabbath true,
   :names
   {:month-of-year "1st",
    :traditional-month-of-year "Nisan",
    :day-of-month "14th",
-   :day-of-week "Sabbath"}},
+   :day-of-week "Sabbath"},
+  :months-in-year 13},
  :time
  {:year
   {:start
-   #object[java.time.ZonedDateTime 0x74968291 "2025-03-29T19:32:29+01:00[Europe/Oslo]"],
+   #object[java.time.ZonedDateTime 0xde04680 "2025-03-29T19:32+01:00[Europe/Oslo]"],
    :end
-   #object[java.time.ZonedDateTime 0x1e60a90e "2026-04-18T00:14:16+02:00[Europe/Oslo]"],
+   #object[java.time.ZonedDateTime 0x6d9bc7a3 "2026-04-18T00:13:59+02:00[Europe/Oslo]"],
    :start-adjusted-for-polar-region false,
    :end-adjusted-for-polar-region false},
   :month
   {:start
-   #object[java.time.ZonedDateTime 0x530073a2 "2025-03-29T19:32:29+01:00[Europe/Oslo]"],
+   #object[java.time.ZonedDateTime 0x9725bac "2025-03-29T19:32+01:00[Europe/Oslo]"],
    :end
-   #object[java.time.ZonedDateTime 0x2bafe6d "2025-04-28T21:24:44+02:00[Europe/Oslo]"],
+   #object[java.time.ZonedDateTime 0x79f65d6d "2025-04-28T21:23:59+02:00[Europe/Oslo]"],
    :start-adjusted-for-polar-region false,
    :end-adjusted-for-polar-region true},
   :week
   {:start
-   #object[java.time.ZonedDateTime 0x72b2edf3 "2025-04-05T21:31:02+02:00[Europe/Oslo]"],
+   #object[java.time.ZonedDateTime 0x536c7f18 "2025-04-05T21:31+02:00[Europe/Oslo]"],
    :end
-   #object[java.time.ZonedDateTime 0x414e156b "2025-04-12T22:44:36+02:00[Europe/Oslo]"],
+   #object[java.time.ZonedDateTime 0x1cde0d39 "2025-04-12T22:43:59+02:00[Europe/Oslo]"],
    :start-adjusted-for-polar-region false,
    :end-adjusted-for-polar-region false},
   :day
   {:start
-   #object[java.time.ZonedDateTime 0x145b19b5 "2025-04-11T22:32:18+02:00[Europe/Oslo]"],
+   #object[java.time.ZonedDateTime 0x54ac8d2e "2025-04-11T22:32+02:00[Europe/Oslo]"],
    :end
-   #object[java.time.ZonedDateTime 0x2d4b124f "2025-04-12T22:44:36+02:00[Europe/Oslo]"],
+   #object[java.time.ZonedDateTime 0x5d8d601e "2025-04-12T22:43:59+02:00[Europe/Oslo]"],
    :start-adjusted-for-polar-region false,
    :end-adjusted-for-polar-region false}}}
 ```
