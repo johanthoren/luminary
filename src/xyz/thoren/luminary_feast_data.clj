@@ -3535,25 +3535,3 @@
                  :hebrew-name "Rosh Chodesh Elul",
                  :day-of-feast 1,
                  :days-in-feast 1}]}}})
-
-(def calculated-feast-days
-  (apply merge [feasts-2020
-                feasts-2021
-                feasts-2022
-                feasts-2023
-                feasts-2024
-                feasts-2025
-                feasts-2026
-                feasts-2027
-                feasts-2028
-                feasts-2029
-                feasts-2030
-                feasts-2031
-                feasts-2032
-                feasts-2033
-                feasts-2034
-                feasts-2035
-                feasts-2036
-                feasts-2037
-                feasts-2038
-                feasts-2039]))
