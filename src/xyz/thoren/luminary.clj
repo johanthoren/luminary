@@ -1,10 +1,8 @@
 (ns xyz.thoren.luminary
   (:require [java-time :as t]
-            [xyz.thoren.equinox :refer [march-equinox]])
+            [xyz.thoren.equinox :refer [march-equinox]]
+            [xyz.thoren.luminary-feast-data :refer [calculated-feast-days]])
   (:import (org.shredzone.commons.suncalc SunTimes MoonPhase)))
-
-(def calculated-feast-days
-  (clojure.edn/read-string (slurp "src/xyz/thoren/feast_data.edn")))
 
 (def jerusalem-lat 31.7781161)
 (def jerusalem-lon 35.233804)
