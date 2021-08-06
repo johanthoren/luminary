@@ -1,8 +1,7 @@
 (ns xyz.thoren.luminary
   (:require [java-time :as t]
             [xyz.thoren.equinox :refer [march-equinox]]
-            [xyz.thoren.luminary-feast-data :refer [calculated-feast-days]]
-            [clojure.string :as str])
+            [xyz.thoren.luminary-feast-data :refer [calculated-feast-days]])
   (:import (org.shredzone.commons.suncalc SunTimes MoonPhase)))
 
 (def jerusalem-lat 31.7781161)
@@ -46,41 +45,24 @@
       (cond (< lat -65.7) (next-sunset -65.7 lon date :adjusted true)
             (> lat 65.7) (next-sunset 65.7 lon date :adjusted true)
             :else (throw
-                    (Exception. (str "Sun either always up or always down but"
-                                     " latitude is: "
-                                     lat))))
-      (nil? sunset) ;; This seems to happen when the sunset happened the minute
-                   ;; before date.
+                   (Exception.
+                    (str "Sun either always up or always down but"
+                         " latitude is: " lat))))
+      (nil? sunset) ;; This seems to happen when the sunset occurred
+                    ;; the minute before `date`.
       (next-sunset lat
                    lon
                    (go-forward (t/minutes 1) date)
                    :adjusted
                    adjusted)
-      :else {:sunset (t/truncate-to sunset :seconds),
+      :else {:sunset (t/truncate-to sunset :minutes),
              :adjusted-for-polar-region adjusted,
              :always-down always-down,
              :always-up always-up})))
 
-(defn- next-start-of-day-full-map
-  [lat lon date]
-  ;; The dancing back and forth in the following function is due to the fact
-  ;; that `SunTimes/compute` seems to give different answers depending on what
-  ;; time of day one provides as date, even if the next time of sunset should
-  ;; be the same.
-  ;;
-  ;; A bug report has been filed upstream:
-  ;; https://github.com/shred/commons-suncalc/issues/30
-  ;;
-  ;; To work around this, always ask for the time of sunset 1 hour before the
-  ;; originally reported sunset.
-  (->> (next-sunset lat lon date)
-       (:sunset)
-       (go-back (t/hours 1))
-       (next-sunset lat lon)))
-
 (defn- next-start-of-day
   [lat lon date]
-  (:sunset (next-start-of-day-full-map lat lon date)))
+  (:sunset (next-sunset lat lon date)))
 
 (defn- previous-start-of-day
   [lat lon date]
@@ -117,7 +99,7 @@
   [date]
   (-> (calculate-new-moon date)
       (.getTime)
-      (t/truncate-to :seconds)))
+      (t/truncate-to :minutes)))
 
 (defn- previous-new-moon
   [date]
@@ -539,7 +521,7 @@
   (if (<= -65 lat 65)
     false
     (->> (go-back (t/hours 2) date)
-         (next-start-of-day-full-map lat lon)
+         (next-sunset lat lon)
          (:adjusted-for-polar-region))))
 
 (defn- assoc-polar-status
