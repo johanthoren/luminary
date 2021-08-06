@@ -1,6 +1,4 @@
-(ns xyz.thoren.luminary-feast-data)
-(def calculated-feast-days
-  {2020 {7 {21 [{:name "First day of Av",
+{2020 {7 {21 [{:name "First day of Av",
                  :hebrew-name "Rosh Chodesh Av",
                  :day-of-feast 1,
                  :days-in-feast 1}]},
@@ -3495,4 +3493,4 @@
          8 {20 [{:name "First day of Elul",
                  :hebrew-name "Rosh Chodesh Elul",
                  :day-of-feast 1,
-                 :days-in-feast 1}]}}})
+                 :days-in-feast 1}]}}}
