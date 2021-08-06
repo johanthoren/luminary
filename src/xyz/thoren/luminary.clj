@@ -802,19 +802,20 @@
                 n)))))
 
 (defn list-of-known-feast-days-in-gregorian-year
-  "Given a gregorian `year`, return a list of strings describing the feast days
-  in that year. The dates represent the gregorian day on which the sunset would
-  begin the feast day in question. Some days will have more than one feast day."
-  ([year coll]
-   (let [y (get coll year)]
-     (sort (for [m (keys y)
-                 d (keys (get y m))
-                 f (get-in y [m d])]
-             (let [n (:name f)
-                   day-of-feast (:day-of-feast f)
-                   days-in-feast (:days-in-feast f)]
-               (long-feast-day-name year m d n day-of-feast days-in-feast))))))
-  ([year]
-   {:pre [(number? year)
-          (<= 2020 year 2039)]}
-   (list-of-known-feast-days-in-gregorian-year year calculated-feast-days)))
+  "Given a gregorian `year` between 1584 and 2100, return a list of strings
+  describing the feast days in that year. The dates represent the gregorian day
+  on which the sunset would begin the feast day in question. Some days will have
+  more than one feast day."
+  [year]
+  {:pre [(<= 1584 year 2100)]}
+  (let [c (if (get calculated-feast-days year)
+            calculated-feast-days
+            (map-of-feast-days-in-gregorian-year year))
+        y (get c year)]
+    (sort (for [m (keys y)
+                d (keys (get y m))
+                f (get-in y [m d])]
+            (let [n (:name f)
+                  day-of-feast (:day-of-feast f)
+                  days-in-feast (:days-in-feast f)]
+              (long-feast-day-name year m d n day-of-feast days-in-feast))))))
