@@ -1,4 +1,7 @@
-{2020 {7 {21 [{:name "First day of Av",
+(ns xyz.thoren.luminary-feast-data)
+
+(def feasts-2020
+  {2020 {7 {21 [{:name "First day of Av",
                  :hebrew-name "Rosh Chodesh Av",
                  :day-of-feast 1,
                  :days-in-feast 1}]},
@@ -174,8 +177,10 @@
          8 {19 [{:name "First day of Elul",
                  :hebrew-name "Rosh Chodesh Elul",
                  :day-of-feast 1,
-                 :days-in-feast 1}]}},
-   2021 {7 {10 [{:name "First day of Tammuz",
+                 :days-in-feast 1}]}}})
+
+(def feasts-2021
+  {2021 {7 {10 [{:name "First day of Tammuz",
                  :hebrew-name "Rosh Chodesh Tammuz",
                  :day-of-feast 1,
                  :days-in-feast 1}]},
@@ -331,8 +336,10 @@
          8 {8 [{:name "First day of Av",
                 :hebrew-name "Rosh Chodesh Av",
                 :day-of-feast 1,
-                :days-in-feast 1}]}},
-   2022 {7 {29 [{:name "First day of Av",
+                :days-in-feast 1}]}}})
+
+(def feasts-2022
+  {2022 {7 {29 [{:name "First day of Av",
                  :hebrew-name "Rosh Chodesh Av",
                  :day-of-feast 1,
                  :days-in-feast 1}]},
@@ -524,8 +531,10 @@
          8 {27 [{:name "First day of Elul",
                  :hebrew-name "Rosh Chodesh Elul",
                  :day-of-feast 1,
-                 :days-in-feast 1}]}},
-   2023 {7 {18 [{:name "First day of Av",
+                 :days-in-feast 1}]}}})
+
+(def feasts-2023
+  {2023 {7 {18 [{:name "First day of Av",
                  :hebrew-name "Rosh Chodesh Av",
                  :day-of-feast 1,
                  :days-in-feast 1}]},
@@ -701,8 +710,10 @@
          8 {16 [{:name "First day of Elul",
                  :hebrew-name "Rosh Chodesh Elul",
                  :day-of-feast 1,
-                 :days-in-feast 1}]}},
-   2024 {7 {6 [{:name "First day of Tammuz",
+                 :days-in-feast 1}]}}})
+
+(def feasts-2024
+  {2024 {7 {6 [{:name "First day of Tammuz",
                 :hebrew-name "Rosh Chodesh Tammuz",
                 :day-of-feast 1,
                 :days-in-feast 1}]},
@@ -874,8 +885,10 @@
          8 {4 [{:name "First day of Av",
                 :hebrew-name "Rosh Chodesh Av",
                 :day-of-feast 1,
-                :days-in-feast 1}]}},
-   2025 {7 {25 [{:name "First day of Av",
+                :days-in-feast 1}]}}})
+
+(def feasts-2025
+  {2025 {7 {25 [{:name "First day of Av",
                  :hebrew-name "Rosh Chodesh Av",
                  :day-of-feast 1,
                  :days-in-feast 1}]},
@@ -1051,8 +1064,10 @@
          8 {23 [{:name "First day of Elul",
                  :hebrew-name "Rosh Chodesh Elul",
                  :day-of-feast 1,
-                 :days-in-feast 1}]}},
-   2026 {7 {14 [{:name "First day of Tammuz",
+                 :days-in-feast 1}]}}})
+
+(def feasts-2026
+  {2026 {7 {14 [{:name "First day of Tammuz",
                  :hebrew-name "Rosh Chodesh Tammuz",
                  :day-of-feast 1,
                  :days-in-feast 1}]},
@@ -1192,8 +1207,10 @@
          8 {13 [{:name "First day of Av",
                  :hebrew-name "Rosh Chodesh Av",
                  :day-of-feast 1,
-                 :days-in-feast 1}]}},
-   2027 {7 {4 [{:name "First day of Tammuz",
+                 :days-in-feast 1}]}}})
+
+(def feasts-2027
+  {2027 {7 {4 [{:name "First day of Tammuz",
                 :hebrew-name "Rosh Chodesh Tammuz",
                 :day-of-feast 1,
                 :days-in-feast 1}]},
@@ -1401,8 +1418,10 @@
          8 {2 [{:name "First day of Av",
                 :hebrew-name "Rosh Chodesh Av",
                 :day-of-feast 1,
-                :days-in-feast 1}]}},
-   2028 {7 {22 [{:name "First day of Av",
+                :days-in-feast 1}]}}})
+
+(def feasts-2028
+  {2028 {7 {22 [{:name "First day of Av",
                  :hebrew-name "Rosh Chodesh Av",
                  :day-of-feast 1,
                  :days-in-feast 1}]},
@@ -1578,8 +1597,10 @@
          8 {20 [{:name "First day of Elul",
                  :hebrew-name "Rosh Chodesh Elul",
                  :day-of-feast 1,
-                 :days-in-feast 1}]}},
-   2029 {7 {11 [{:name "First day of Tammuz",
+                 :days-in-feast 1}]}}})
+
+(def feasts-2029
+  {2029 {7 {11 [{:name "First day of Tammuz",
                  :hebrew-name "Rosh Chodesh Tammuz",
                  :day-of-feast 1,
                  :days-in-feast 1}]},
@@ -1727,8 +1748,10 @@
          8 {10 [{:name "First day of Av",
                  :hebrew-name "Rosh Chodesh Av",
                  :day-of-feast 1,
-                 :days-in-feast 1}]}},
-   2030 {7 {1 [{:name "First day of Tammuz",
+                 :days-in-feast 1}]}}})
+
+(def feasts-2030
+  {2030 {7 {1 [{:name "First day of Tammuz",
                 :hebrew-name "Rosh Chodesh Tammuz",
                 :day-of-feast 1,
                 :days-in-feast 1}],
@@ -1928,8 +1951,10 @@
          8 {29 [{:name "First day of Elul",
                  :hebrew-name "Rosh Chodesh Elul",
                  :day-of-feast 1,
-                 :days-in-feast 1}]}},
-   2031 {7 {19 [{:name "First day of Av",
+                 :days-in-feast 1}]}}})
+
+(def feasts-2031
+  {2031 {7 {19 [{:name "First day of Av",
                  :hebrew-name "Rosh Chodesh Av",
                  :day-of-feast 1,
                  :days-in-feast 1}]},
@@ -2089,8 +2114,10 @@
          8 {18 [{:name "First day of Elul",
                  :hebrew-name "Rosh Chodesh Elul",
                  :day-of-feast 1,
-                 :days-in-feast 1}]}},
-   2032 {7 {7 [{:name "First day of Tammuz",
+                 :days-in-feast 1}]}}})
+
+(def feasts-2032
+  {2032 {7 {7 [{:name "First day of Tammuz",
                 :hebrew-name "Rosh Chodesh Tammuz",
                 :day-of-feast 1,
                 :days-in-feast 1}]},
@@ -2250,8 +2277,10 @@
          8 {6 [{:name "First day of Av",
                 :hebrew-name "Rosh Chodesh Av",
                 :day-of-feast 1,
-                :days-in-feast 1}]}},
-   2033 {7 {26 [{:name "First day of Av",
+                :days-in-feast 1}]}}})
+
+(def feasts-2033
+  {2033 {7 {26 [{:name "First day of Av",
                  :hebrew-name "Rosh Chodesh Av",
                  :day-of-feast 1,
                  :days-in-feast 1}]},
@@ -2439,8 +2468,10 @@
          8 {25 [{:name "First day of Elul",
                  :hebrew-name "Rosh Chodesh Elul",
                  :day-of-feast 1,
-                 :days-in-feast 1}]}},
-   2034 {7 {16 [{:name "First day of Av",
+                 :days-in-feast 1}]}}})
+
+(def feasts-2034
+  {2034 {7 {16 [{:name "First day of Av",
                  :hebrew-name "Rosh Chodesh Av",
                  :day-of-feast 1,
                  :days-in-feast 1}]},
@@ -2616,8 +2647,10 @@
          8 {14 [{:name "First day of Elul",
                  :hebrew-name "Rosh Chodesh Elul",
                  :day-of-feast 1,
-                 :days-in-feast 1}]}},
-   2035 {7 {5 [{:name "First day of Tammuz",
+                 :days-in-feast 1}]}}})
+
+(def feasts-2035
+  {2035 {7 {5 [{:name "First day of Tammuz",
                 :hebrew-name "Rosh Chodesh Tammuz",
                 :day-of-feast 1,
                 :days-in-feast 1}]},
@@ -2793,8 +2826,10 @@
          8 {4 [{:name "First day of Av",
                 :hebrew-name "Rosh Chodesh Av",
                 :day-of-feast 1,
-                :days-in-feast 1}]}},
-   2036 {7 {23 [{:name "First day of Av",
+                :days-in-feast 1}]}}})
+
+(def feasts-2036
+  {2036 {7 {23 [{:name "First day of Av",
                  :hebrew-name "Rosh Chodesh Av",
                  :day-of-feast 1,
                  :days-in-feast 1}]},
@@ -2966,8 +3001,10 @@
          8 {22 [{:name "First day of Elul",
                  :hebrew-name "Rosh Chodesh Elul",
                  :day-of-feast 1,
-                 :days-in-feast 1}]}},
-   2037 {7 {13 [{:name "First day of Tammuz",
+                 :days-in-feast 1}]}}})
+
+(def feasts-2037
+  {2037 {7 {13 [{:name "First day of Tammuz",
                  :hebrew-name "Rosh Chodesh Tammuz",
                  :day-of-feast 1,
                  :days-in-feast 1}]},
@@ -3111,8 +3148,10 @@
          8 {11 [{:name "First day of Av",
                  :hebrew-name "Rosh Chodesh Av",
                  :day-of-feast 1,
-                 :days-in-feast 1}]}},
-   2038 {7 {2 [{:name "First day of Tammuz",
+                 :days-in-feast 1}]}}})
+
+(def feasts-2038
+  {2038 {7 {2 [{:name "First day of Tammuz",
                 :hebrew-name "Rosh Chodesh Tammuz",
                 :day-of-feast 1,
                 :days-in-feast 1}]},
@@ -3316,8 +3355,10 @@
             30 [{:name "First day of Elul",
                  :hebrew-name "Rosh Chodesh Elul",
                  :day-of-feast 1,
-                 :days-in-feast 1}]}},
-   2039 {7 {21 [{:name "First day of Av",
+                 :days-in-feast 1}]}}})
+
+(def feasts-2039
+  {2039 {7 {21 [{:name "First day of Av",
                  :hebrew-name "Rosh Chodesh Av",
                  :day-of-feast 1,
                  :days-in-feast 1}]},
@@ -3493,4 +3534,26 @@
          8 {20 [{:name "First day of Elul",
                  :hebrew-name "Rosh Chodesh Elul",
                  :day-of-feast 1,
-                 :days-in-feast 1}]}}}
+                 :days-in-feast 1}]}}})
+
+(def calculated-feast-days
+  (apply merge [feasts-2020
+                feasts-2021
+                feasts-2022
+                feasts-2023
+                feasts-2024
+                feasts-2025
+                feasts-2026
+                feasts-2027
+                feasts-2028
+                feasts-2029
+                feasts-2030
+                feasts-2031
+                feasts-2032
+                feasts-2033
+                feasts-2034
+                feasts-2035
+                feasts-2036
+                feasts-2037
+                feasts-2038
+                feasts-2039]))
