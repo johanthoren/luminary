@@ -1,12 +1,34 @@
 (ns xyz.thoren.luminary
   (:require [java-time :as t]
             [xyz.thoren.equinox :refer [march-equinox]]
-            [xyz.thoren.luminary-feast-data :refer [calculated-feast-days]])
+            [xyz.thoren.luminary-feast-data :as fd])
   (:import (org.shredzone.commons.suncalc SunTimes MoonPhase)))
 
 (def jerusalem-lat 31.7781161)
 (def jerusalem-lon 35.233804)
 (def jerusalem-tz "Asia/Jerusalem")
+
+(def calculated-feast-days
+  (apply merge [fd/feasts-2020
+                fd/feasts-2021
+                fd/feasts-2022
+                fd/feasts-2023
+                fd/feasts-2024
+                fd/feasts-2025
+                fd/feasts-2026
+                fd/feasts-2027
+                fd/feasts-2028
+                fd/feasts-2029
+                fd/feasts-2030
+                fd/feasts-2031
+                fd/feasts-2032
+                fd/feasts-2033
+                fd/feasts-2034
+                fd/feasts-2035
+                fd/feasts-2036
+                fd/feasts-2037
+                fd/feasts-2038
+                fd/feasts-2039]))
 
 (defn- make-utc-date
   [& args]
