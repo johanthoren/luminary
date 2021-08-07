@@ -13,6 +13,9 @@ the 1st Book of Enoch.
 
 [![Clojars Project](https://img.shields.io/clojars/v/xyz.thoren/luminary.svg)](https://clojars.org/xyz.thoren/luminary)
 
+Note that Luminary is still in active development and things are changing with 
+every release. Consider it unstable until a 1.0.0 release has been tagged.
+
 Require:
 
 ``` clojure
