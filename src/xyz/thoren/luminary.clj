@@ -633,10 +633,8 @@
   ([lat lon date]
    {:pre [(and (number? lat) (<= -90 lat 90))
           (and (number? lon) (<= -180 lon 180))
-          (and (or (t/zoned-date-time? date)
-                   (t/local-date-time? date)
-                   (t/offset-date-time date))
-               (<= 1584 (t/as date :year) 2200))]}
+          (t/zoned-date-time? date)
+          (<= 1584 (t/as date :year) 2100)]}
    (let [y (boundaries-of-year lat lon date)
          m (boundaries-of-month lat lon date)
          w (boundaries-of-week lat lon date)
@@ -679,7 +677,8 @@
 
   See also `hebrew-date`, `zone-it`, and `now`."
   ([lat lon m d date]
-   {:pre [(and (pos-int? m) (< 0 m 14)) (and (pos-int? d) (< 0 d 31))]}
+   {:pre [(t/zoned-date-time? date)
+          (and (pos-int? m) (< 0 m 14)) (and (pos-int? d) (< 0 d 31))]}
    (try
      (let [months (start-of-months-in-year lat lon date)
            start-of-month (nth months (dec m))
@@ -725,7 +724,7 @@
 
   See also `find-date`."
   ([lat lon tz y m d]
-   {:pre [(string? tz) (and (pos-int? y) (<= 1584 y 2200))
+   {:pre [(string? tz) (and (pos-int? y) (<= 1584 y 2100))
           (and (pos-int? m) (< 0 m 14)) (and (pos-int? d) (< 0 d 31))]}
    (find-date lat lon m d (make-zoned-date tz y 6 1 12)))
   ([tz y m d] (find-date-in-year jerusalem-lat jerusalem-lon tz y m d))
@@ -804,7 +803,6 @@
   on which the sunset would begin the feast day in question. Some days will have
   more than one feast day."
   [year]
-  {:pre [(<= 1584 year 2100)]}
   (let [c (if (get calculated-feast-days year)
             calculated-feast-days
             (map-of-feast-days-in-gregorian-year year))
