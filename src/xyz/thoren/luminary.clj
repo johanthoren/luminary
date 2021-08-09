@@ -2,7 +2,9 @@
   (:require [java-time :as t]
             [xyz.thoren.equinox :refer [march-equinox]]
             [xyz.thoren.luminary-feast-data :as fd])
-  (:import (org.shredzone.commons.suncalc SunTimes MoonPhase)))
+  (:import (org.shredzone.commons.suncalc SunTimes SunTimes$SunTimesBuilder
+                                          MoonPhase MoonPhase$MoonPhaseBuilder)
+           (java.time ZonedDateTime)))
 
 (def jerusalem-lat 31.7781161)
 (def jerusalem-lon 35.233804)
@@ -124,7 +126,7 @@
         month (t/as date :month-of-year)
         day (t/as date :day-of-month)
         morning (t/with-zone (t/zoned-date-time year month day 4 0) tz)]
-    (.getNoon (calculate-sun-events lat lon morning))))
+    (.getNoon ^SunTimes (calculate-sun-events lat lon morning))))
 
 (defn- boundaries-of-day
   [lat lon date]
@@ -135,18 +137,18 @@
     [p (go-back (t/seconds 1) n)]))
 
 (defn- calculate-new-moon
-  [date]
-  (let [tz (tz? date)]
-    (-> (MoonPhase/compute)
-        (.on date)
-        (.timezone (str tz))
-        (.execute))))
+  [^ZonedDateTime date]
+  (let [t (str (tz? date))]
+    (as-> (MoonPhase/compute) <>
+      (.on ^MoonPhase$MoonPhaseBuilder <> date)
+      (.timezone ^MoonPhase$MoonPhaseBuilder <> t)
+      (.execute ^MoonPhase$MoonPhaseBuilder <>))))
 
 (defn- next-new-moon
   [date]
-  (-> (calculate-new-moon date)
-      (.getTime)
-      (t/truncate-to :minutes)))
+  (as-> (calculate-new-moon date) <>
+        (.getTime ^MoonPhase <>)
+        (t/truncate-to <> :minutes)))
 
 (defn- previous-new-moon
   [date]
