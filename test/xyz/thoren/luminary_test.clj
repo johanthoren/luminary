@@ -202,7 +202,7 @@
           t #(is (= %6
                     (str (#'xyz.thoren.luminary/previous-start-of-month
                           lat lon (t/with-zone
-                                    (t/zoned-date-time %1 %2 %3 %4 %5 0 0 0)
+                                    (t/zoned-date-time %1 %2 %3 %4 %5)
                                     "Asia/Jerusalem")))))]
       (t 2021 7 10 1 20 "2021-06-10T19:44+03:00[Asia/Jerusalem]")
       (t 2021 7 10 19 50 "2021-07-10T19:47+03:00[Asia/Jerusalem]")
@@ -225,7 +225,7 @@
           t #(is (= %6
                     (str (#'xyz.thoren.luminary/previous-start-of-month
                           lat lon (t/with-zone
-                                    (t/zoned-date-time %1 %2 %3 %4 %5 0 0 0)
+                                    (t/zoned-date-time %1 %2 %3 %4 %5)
                                     "Europe/Stockholm")))))]
       (t 2021 7 10 1 20 "2021-06-10T23:54+02:00[Europe/Stockholm]")
       (t 2021 7 10 19 50 "2021-06-10T23:54+02:00[Europe/Stockholm]")
@@ -240,7 +240,7 @@
           t #(is (= %6
                     (str (#'xyz.thoren.luminary/previous-start-of-month
                           lat lon (#'xyz.thoren.luminary/make-zoned-date
-                                    "Antarctica/Palmer" %1 %2 %3 %4 %5 0 0 0)))))]
+                                    "Antarctica/Palmer" %1 %2 %3 %4 %5)))))]
       (t 2021 7 10 1 20 "2021-06-10T17:08-03:00[Antarctica/Palmer]")
       (t 2021 7 10 19 50 "2021-07-10T17:22-03:00[Antarctica/Palmer]")
       (t 2021 12 4 6 35 "2021-11-05T20:57-03:00[Antarctica/Palmer]")
@@ -254,7 +254,7 @@
           t #(is (= %6
                     (str (#'xyz.thoren.luminary/previous-start-of-month
                           lat lon (#'xyz.thoren.luminary/make-zoned-date
-                                    "America/Anchorage" %1 %2 %3 %4 %5 0 0 0)))))]
+                                    "America/Anchorage" %1 %2 %3 %4 %5)))))]
       (t 2021 7 10 1 20 "2021-06-10T23:34-08:00[America/Anchorage]")
       (t 2021 7 10 23 50 "2021-07-10T23:26-08:00[America/Anchorage]")
       (t 2021 12 4 6 35 "2021-11-05T17:46-08:00[America/Anchorage]")
