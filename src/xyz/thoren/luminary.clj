@@ -390,63 +390,73 @@
     :days-in-feast 1))
 
 (defn- rosh-chodesh
-  [trad-name]
-  (single-day-feast {:name (str "First day of " trad-name,)
-                     :hebrew-name (str "Rosh Chodesh " trad-name)}))
+  [month-of-year]
+  (single-day-feast
+   {:name (str "First day of the "
+               (if (= month-of-year 1)
+                 "year"
+                 (str (nth month-numbers (dec month-of-year))
+                      " month")))
+    :hebrew-name (str "Rosh Chodesh "
+                      (nth trad-month-names (dec month-of-year)))}))
 
-(def pesach (single-day-feast {:name "Passover", :hebrew-name "Pesach"}))
+(def pesach (single-day-feast {:name "Passover"
+                               :hebrew-name "Pesach"}))
 
 (defn- ha-matzot
   [day-of-feast]
-  {:name "Feast of Unleavened Bread",
-   :hebrew-name "Chag Ha-Matzot",
-   :day-of-feast day-of-feast,
+  {:name "Feast of Unleavened Bread"
+   :hebrew-name "Chag Ha-Matzot"
+   :day-of-feast day-of-feast
    :days-in-feast 7})
 
-(defn- yom-bikkurim
-  [day-of-month]
-  (single-day-feast {:name "Feast of First Fruits",
+(def yom-bikkurim
+  (single-day-feast {:name "Feast of First Fruits"
                      :hebrew-name "Yom Bikkurim"}))
 
 (def shavuot
-  (single-day-feast {:name "Feast of Weeks",
-                     :alternative-name "Feast of Pentecost",
+  (single-day-feast {:name "Feast of Weeks"
+                     :alternative-name "Feast of Pentecost"
                      :hebrew-name "Shavuot"}))
 
 (defn- ha-sukkot
   [day-of-feast]
-  {:name "Feast of Tabernacles",
-   :alternative-name "Feast of Booths",
-   :hebrew-name "Chag Ha-Sukkot",
-   :day-of-feast day-of-feast,
+  {:name "Feast of Tabernacles"
+   :alternative-name "Feast of Booths"
+   :hebrew-name "Chag Ha-Sukkot"
+   :day-of-feast day-of-feast
    :days-in-feast 7})
 
 (def yom-teruah
-  (single-day-feast {:name "Feast of Trumpets", :hebrew-name "Yom Teruah"}))
+  (single-day-feast {:name "Feast of Trumpets"
+                     :hebrew-name "Yom Teruah"}))
 
 (def yom-ha-kippurim
-  (single-day-feast {:name "Day of Atonement",
-                     :hebrew-name "Yom Ha-Kippurim",
+  (single-day-feast {:name "Day of Atonement"
+                     :hebrew-name "Yom Ha-Kippurim"
                      :alternative-hebrew-name "Yom Kippur"}))
 
 (def shemini-atzeret
-  (single-day-feast {:name "The Last Great Day",
+  (single-day-feast {:name "The Last Great Day"
                      :hebrew-name "Shemini Atzeret"}))
 
 (defn- chanukah
-  [day-of-month day-of-feast]
-  {:name "Hanukkah",
-   :hebrew-name "Chanukah",
-   :day-of-feast day-of-feast,
+  [day-of-feast]
+  {:name "Hanukkah"
+   :hebrew-name "Chanukah"
+   :day-of-feast day-of-feast
    :days-in-feast 8})
 
 (def purim
-  {:name "Purim", :hebrew-name "Purim", :day-of-feast 1, :days-in-feast 2})
+  {:name "Purim"
+   :hebrew-name "Purim"
+   :day-of-feast 1
+   :days-in-feast 2})
 
 (def shushan-purim
-  {:name "Shushan Purim",
-   :hebrew-name "Shushan Purim",
-   :day-of-feast 2,
+  {:name "Shushan Purim"
+   :hebrew-name "Shushan Purim"
+   :day-of-feast 2
    :days-in-feast 2})
 
 (defn- days-between
@@ -461,7 +471,7 @@
   return false if there are none."
   [m d]
   (cond
-    (= d 1) (rosh-chodesh (nth traditional-month-names (dec m)))
+    (= d 1) (rosh-chodesh m)
     :else false))
 
 (defn- major-feast-day?
@@ -485,7 +495,7 @@
                            (+ days-in-first-month days-in-prev-month))]
     (cond
       (and (= m 1) (= d 14)) pesach
-      (and (= m 1) (<= 15 d 21) (= dow 1)) (yom-bikkurim d)
+      (and (= m 1) (<= 15 d 21) (= dow 1)) yom-bikkurim
       (and (= m 1) (= d 15)) (ha-matzot 1)
       (and (= m 1) (= d 16)) (ha-matzot 2)
       (and (= m 1) (= d 17)) (ha-matzot 3)
@@ -506,17 +516,17 @@
       (and (= m 7) (= d 20)) (ha-sukkot 6)
       (and (= m 7) (= d 21)) (ha-sukkot 7)
       (and (= m 7) (= d 22)) shemini-atzeret
-      (and (= m 9) (= d 25)) (chanukah d 1)
-      (and (= m 9) (= d 26)) (chanukah d 2)
-      (and (= m 9) (= d 27)) (chanukah d 3)
-      (and (= m 9) (= d 28)) (chanukah d 4)
-      (and (= m 9) (= d 29)) (chanukah d 5)
-      (and (= m 9) (= d 30)) (chanukah d 6)
-      (and (= m 10) (= d 1) (= days-in-prev-month 29)) (chanukah d 6)
-      (and (= m 10) (= d 1) (= days-in-prev-month 30)) (chanukah d 7)
-      (and (= m 10) (= d 2) (= days-in-prev-month 29)) (chanukah d 7)
-      (and (= m 10) (= d 2) (= days-in-prev-month 30)) (chanukah d 8)
-      (and (= m 10) (= d 3) (= days-in-prev-month 29)) (chanukah d 8)
+      (and (= m 9) (= d 25)) (chanukah 1)
+      (and (= m 9) (= d 26)) (chanukah 2)
+      (and (= m 9) (= d 27)) (chanukah 3)
+      (and (= m 9) (= d 28)) (chanukah 4)
+      (and (= m 9) (= d 29)) (chanukah 5)
+      (and (= m 9) (= d 30)) (chanukah 6)
+      (and (= m 10) (= d 1) (= days-in-prev-month 29)) (chanukah 6)
+      (and (= m 10) (= d 1) (= days-in-prev-month 30)) (chanukah 7)
+      (and (= m 10) (= d 2) (= days-in-prev-month 29)) (chanukah 7)
+      (and (= m 10) (= d 2) (= days-in-prev-month 30)) (chanukah 8)
+      (and (= m 10) (= d 3) (= days-in-prev-month 29)) (chanukah 8)
       (and (= m 12) (= d 14)) purim
       (and (= m 12) (= d 15)) shushan-purim
       :else false)))
