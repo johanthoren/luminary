@@ -34,6 +34,10 @@
   [& args]
   (t/with-zone (apply t/zoned-date-time args) "UTC"))
 
+(defn- make-zoned-date
+  [tz & args]
+  (t/with-zone (apply t/zoned-date-time args) tz))
+
 (defn- date-of-march-equinox
   [year]
   (->> [:year :month :day :hour :minute :second]
@@ -57,7 +61,7 @@
         (.execute))))
 
 (defn- next-sunset
-  [lat lon date & {:keys [adjusted], :or {adjusted false}}]
+  [lat lon date & {:keys [adjusted] :or {adjusted false}}]
   (let [sun (calculate-sun-events lat lon date)
         always-up (.isAlwaysUp sun)
         always-down (.isAlwaysDown sun)
@@ -77,9 +81,9 @@
                    (go-forward (t/minutes 1) date)
                    :adjusted
                    adjusted)
-      :else {:sunset (t/truncate-to sunset :minutes),
-             :adjusted-for-polar-region adjusted,
-             :always-down always-down,
+      :else {:sunset (t/truncate-to sunset :minutes)
+             :adjusted-for-polar-region adjusted
+             :always-down always-down
              :always-up always-up})))
 
 (defn- next-start-of-day
@@ -156,10 +160,6 @@
        (next-start-of-month-in-israel)))
 
 (defn- year-month-day [date] (t/as date :year :month-of-year :day-of-month))
-
-(defn- make-zoned-date
-  [tz & args]
-  (t/with-zone (apply t/zoned-date-time args) tz))
 
 (defn- next-start-of-month
   [lat lon date]
@@ -304,17 +304,6 @@
          (filter #(t/before? % (second w)))
          (cons (first w)))))
 
-(defn- day-of-week
-  [lat lon date]
-  (let [p (previous-start-of-day lat lon date)
-        pj (t/as p :julian-day)]
-    (->> (start-of-days-in-week lat lon date)
-         (map #(t/as % :julian-day))
-         (apply sorted-set)
-         (keep-indexed #(when (= %2 pj) %1))
-         (first)
-         (inc))))
-
 (defn- new-moons-since-start-of-year
   [lat lon date]
   (let [y (boundaries-of-year lat lon date)
@@ -332,16 +321,6 @@
        (map #(next-start-of-month lat lon (go-back (t/hours 1) %)))
        (cons (previous-start-of-year lat lon date))))
 
-(defn- month
-  [lat lon date]
-  (let [p (t/as (previous-start-of-month lat lon date) :julian-day)]
-    (->> (start-of-months-in-year lat lon date)
-         (map #(t/as % :julian-day))
-         (apply sorted-set)
-         (keep-indexed #(when (= %2 p) %1))
-         (first)
-         (inc))))
-
 (defn- start-of-days-in-month
   [lat lon date]
   (let [m (boundaries-of-month lat lon date)
@@ -357,7 +336,17 @@
          (filter #(t/before? % end-of-month))
          (cons start-of-month))))
 
-(defn- day-of-month
+(defn- hebrew-month-of-year
+  [lat lon date]
+  (let [p (t/as (previous-start-of-month lat lon date) :julian-day)]
+    (->> (start-of-months-in-year lat lon date)
+         (map #(t/as % :julian-day))
+         (apply sorted-set)
+         (keep-indexed #(when (= %2 p) %1))
+         (first)
+         (inc))))
+
+(defn- hebrew-day-of-month
   [lat lon date]
   (let [p (previous-start-of-day lat lon date)
         pj (t/as p :julian-day)
@@ -368,7 +357,18 @@
          (first)
          (inc))))
 
-(def traditional-month-names
+(defn- hebrew-day-of-week
+  [lat lon date]
+  (let [p (previous-start-of-day lat lon date)
+        pj (t/as p :julian-day)]
+    (->> (start-of-days-in-week lat lon date)
+         (map #(t/as % :julian-day))
+         (apply sorted-set)
+         (keep-indexed #(when (= %2 pj) %1))
+         (first)
+         (inc))))
+
+(def trad-month-names
   ["Nisan" "Iyar" "Sivan" "Tammuz" "Av" "Elul" "Tishrei" "Marcheshvan" "Kislev"
    "Tevet" "Shevat" "Adar" "Adar II"])
 
@@ -548,6 +548,33 @@
       (and major-feast-day (= "Feast of First Fruits" (:name major-feast-day)))
       (and major-feast-day (= "Feast of Weeks" (:name major-feast-day)))))
 
+(defn- hebrew-names
+  [month-of-year months-in-year day-of-month day-of-week]
+  {:month-of-year (nth month-numbers (dec month-of-year))
+   :traditional-month-of-year
+     (if (and (= month-of-year 12) (= months-in-year 13))
+       "Adar I"
+       (nth trad-month-names (dec month-of-year)))
+   :day-of-month (nth day-numbers (dec day-of-month))
+   :day-of-week (nth weekday-names (dec day-of-week))})
+
+(defn- hebrew-date-map
+  [lat lon y m date]
+  (let [months-in-y (if (<= 383 (days-between (first y) (last y)) 384) 13 12)
+        moy (hebrew-month-of-year lat lon date)
+        dom (hebrew-day-of-month lat lon date)
+        dow (hebrew-day-of-week lat lon date)
+        major-feast-day (major-feast-day? moy dom dow (first y) (first m))]
+    {:month-of-year moy
+     :months-in-year months-in-y
+     :day-of-month dom
+     :days-in-month (days-between (first m) (last m))
+     :day-of-week dow
+     :sabbath (sabbath? moy dom dow major-feast-day)
+     :minor-feast-day (minor-feast-day? moy dom)
+     :major-feast-day major-feast-day
+     :names (hebrew-names moy months-in-y dom dow)}))
+
 (defn- polar-adjusted?
   [lat lon date]
   (if (<= -65 lat 65)
@@ -565,6 +592,13 @@
 (defn- with-polar-status
   [lat lon m]
   (into (empty m) (for [[k v] m] [k (assoc-polar-status lat lon v)])))
+
+(defn- hebrew-time-map
+  [lat lon y m w d]
+  (with-polar-status lat lon {:year {:start (first y) :end (last y)}
+                              :month {:start (first m) :end (last m)}
+                              :week {:start (first w) :end (last w)}
+                              :day {:start (first d) :end (last d)}}))
 
 (defn now "Return the current time." [] (t/zoned-date-time))
 
@@ -595,7 +629,7 @@
   they will be inaccurate. Calculating the timezone of a given location is out
   of scope of this library.
 
-  See also `zone-it`, and `now`."
+  See also `zone-it`, `hebrew-date-map`, `hebrew-time-map`, and `now`."
   ([lat lon date]
    {:pre [(and (number? lat) (<= -90 lat 90))
           (and (number? lon) (<= -180 lon 180))
@@ -603,61 +637,14 @@
                    (t/local-date-time? date)
                    (t/offset-date-time date))
                (<= 1584 (t/as date :year) 2200))]}
-   (let [day-boundaries (boundaries-of-day lat lon date)
-         week-boundaries (boundaries-of-week lat lon date)
-         month-boundaries (boundaries-of-month lat lon date)
-         year-boundaries (boundaries-of-year lat lon date)
-         start-of-year (first year-boundaries)
-         end-of-year (last year-boundaries)
-         start-of-month (first month-boundaries)
-         end-of-month (last month-boundaries)
-         start-of-week (first week-boundaries)
-         end-of-week (last week-boundaries)
-         start-of-day (first day-boundaries)
-         end-of-day (last day-boundaries)
-         days-in-month (days-between start-of-month end-of-month),
-         days-in-year (days-between start-of-year end-of-year)
-         months-in-year (if (<= 383 days-in-year 384) 13 12)
-         month (month lat lon date)
-         dom (day-of-month lat lon date)
-         dow (day-of-week lat lon date)
-         names {:month-of-year (nth month-numbers (dec month)),
-                :traditional-month-of-year
-                  (if (and (= month 12) (= months-in-year 13))
-                    "Adar I"
-                    (nth traditional-month-names (dec month))),
-                :day-of-month (nth day-numbers (dec dom)),
-                :day-of-week (nth weekday-names (dec dow))}
-         minor-feast-day (minor-feast-day? month dom)
-         major-feast-day (major-feast-day? month dom dow start-of-year
-                                                    start-of-month)
-         sabbath (sabbath? month dom dow major-feast-day)]
-     {:hebrew {:month-of-year month,
-               :months-in-year months-in-year,
-               :day-of-month dom,
-               :days-in-month days-in-month,
-               :day-of-week dow,
-               :sabbath sabbath,
-               :minor-feast-day minor-feast-day,
-               :major-feast-day major-feast-day,
-               :names names},
-      :time (with-polar-status lat
-                               lon
-                               {:year {:start start-of-year, :end end-of-year},
-                                :month {:start start-of-month,
-                                        :end end-of-month},
-                                :week {:start start-of-week, :end end-of-week},
-                                :day {:start start-of-day, :end end-of-day}})}))
-  ([lat lon]
-   {:pre [(and (number? lat) (<= -90 lat 90))
-          (and (number? lon) (<= -180 lon 180))]}
-   (hebrew-date lat lon (now)))
-  ([date]
-   {:pre [(and (or (t/zoned-date-time? date)
-                   (t/local-date-time? date)
-                   (t/offset-date-time date))
-               (<= 1584 (t/as date :year) 2100))]}
-   (hebrew-date jerusalem-lat jerusalem-lon date))
+   (let [y (boundaries-of-year lat lon date)
+         m (boundaries-of-month lat lon date)
+         w (boundaries-of-week lat lon date)
+         d (boundaries-of-day lat lon date)]
+     {:hebrew (hebrew-date-map lat lon y m date)
+      :time (hebrew-time-map lat lon y m w d)}))
+  ([lat lon] (hebrew-date lat lon (now)))
+  ([date] (hebrew-date jerusalem-lat jerusalem-lon date))
   ([] (hebrew-date (zone-it jerusalem-tz (now)))))
 
 (defn find-date
@@ -693,19 +680,19 @@
   See also `hebrew-date`, `zone-it`, and `now`."
   ([lat lon m d date]
    {:pre [(and (pos-int? m) (< 0 m 14)) (and (pos-int? d) (< 0 d 31))]}
-   (let [months (start-of-months-in-year lat lon date)
-         start-of-month (try (nth months (dec m))
-                             (catch IndexOutOfBoundsException _e nil))
-         days (when start-of-month
-                (->> start-of-month
-                     (go-forward (t/hours 1))
-                     (start-of-days-in-month lat lon)))]
-     (when days
-       (try (->> (dec d)
+   (try
+     (let [months (start-of-months-in-year lat lon date)
+           start-of-month (nth months (dec m))
+           days (when start-of-month
+                  (->> start-of-month
+                       (go-forward (t/hours 1))
+                       (start-of-days-in-month lat lon)))]
+          (when days
+            (->> (dec d)
                  (nth days)
                  (go-forward (t/hours 1))
-                 (hebrew-date lat lon))
-            (catch IndexOutOfBoundsException _e nil)))))
+                 (hebrew-date lat lon))))
+     (catch IndexOutOfBoundsException _e nil)))
   ([m d date] (find-date jerusalem-lat jerusalem-lon m d date))
   ([m d] (find-date m d (zone-it jerusalem-tz (now)))))
 
