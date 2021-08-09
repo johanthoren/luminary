@@ -30,13 +30,40 @@
                 fd/feasts-2038
                 fd/feasts-2039]))
 
-(defn- make-utc-date
-  [& args]
-  (t/with-zone (apply t/zoned-date-time args) "UTC"))
+(defn- valid-zone-id?
+  [s]
+  (t/zone-id? (try (t/zone-id s) (catch Exception _e nil))))
 
-(defn- make-zoned-date
+(defn zone-it
+  "Given a string containing a valid timezone name `tz`, and a
+  java.time.ZonedDateTime object `date`, convert `date` to the same instant in
+  `tz`."
+  [tz date]
+  {:pre [(valid-zone-id? tz) (t/zoned-date-time? date)]}
+  (t/with-zone-same-instant date tz))
+
+(defn make-zoned-date
+  "Given a string containing a valid timezone name `tz`, and at least 3
+  integers, return a ZonedDateTime object. Accepts between 3 and 7 integer
+  arguments representing year, month, day, hour, minute, second, nanos."
   [tz & args]
+  {:pre [(valid-zone-id? tz)
+         (empty? (remove int? args))
+         (<= 3 (count args) 7)]}
   (t/with-zone (apply t/zoned-date-time args) tz))
+
+(defn make-utc-date
+  "Given at least 3 integers, return a ZonedDateTime object in the UTC timezone.
+  Accepts between 3 and 7 arguments representing year, month, day, hour, minute,
+  second, nanos."
+  [& args]
+  (apply make-zoned-date (cons "UTC" args)))
+
+(defn- tz? [date] (t/zone-id date))
+
+(defn- go-back [adjustment date] (t/adjust date t/minus adjustment))
+
+(defn- go-forward [adjustment date] (t/adjust date t/plus adjustment))
 
 (defn- date-of-march-equinox
   [year]
@@ -44,25 +71,19 @@
        (map #(% (march-equinox year)))
        (apply make-utc-date)))
 
-(defn- go-back [adjustment date] (t/adjust date t/minus adjustment))
-
-(defn- go-forward [adjustment date] (t/adjust date t/plus adjustment))
-
-(defn- tz? [date] (t/zone-id date))
-
 (defn- calculate-sun-events
-  [lat lon date]
-  (let [tz (tz? date)]
-    (-> (SunTimes/compute)
-        (.on date)
-        (.at lat lon)
-        (.oneDay)
-        (.timezone (str tz))
-        (.execute))))
+  [lat lon ^ZonedDateTime date]
+  (let [t (str (tz? date))]
+    (as-> (SunTimes/compute) <>
+      (.on ^SunTimes$SunTimesBuilder <> date)
+      (.at ^SunTimes$SunTimesBuilder <> lat lon)
+      (.oneDay ^SunTimes$SunTimesBuilder <>)
+      (.timezone ^SunTimes$SunTimesBuilder <> t)
+      (.execute ^SunTimes$SunTimesBuilder <>))))
 
 (defn- next-sunset
   [lat lon date & {:keys [adjusted] :or {adjusted false}}]
-  (let [sun (calculate-sun-events lat lon date)
+  (let [sun ^SunTimes (calculate-sun-events lat lon date)
         always-up (.isAlwaysUp sun)
         always-down (.isAlwaysDown sun)
         sunset (.getSet sun)]
@@ -132,13 +153,6 @@
   (->> (next-new-moon date)
        (go-back (t/days 31))
        (next-new-moon)))
-
-(defn zone-it
-  "Given a string containing a valid timezone name `tz`, and a
-  java.time.ZonedDateTime object `date`, convert `date` to the same instant in
-  `tz`."
-  [tz date]
-  (t/with-zone-same-instant date tz))
 
 (defn- next-start-of-month-in-israel
   [date]
