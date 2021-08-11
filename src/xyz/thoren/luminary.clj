@@ -337,6 +337,10 @@
        (map #(next-start-of-month lat lon (go-back (t/hours 1) %)))
        (cons (previous-start-of-year lat lon date))))
 
+(defn- hebrew-months-in-year
+  [lat lon date]
+  (count (start-of-months-in-year lat lon date)))
+
 (defn- start-of-days-in-month
   [lat lon date]
   (let [m (boundaries-of-month lat lon date)
@@ -351,6 +355,10 @@
          (dedupe)
          (filter #(t/before? % end-of-month))
          (cons start-of-month))))
+
+(defn- hebrew-days-in-month
+  [lat lon date]
+  (count (start-of-days-in-month lat lon date)))
 
 (defn- hebrew-month-of-year
   [lat lon date]
@@ -408,11 +416,10 @@
 (defn- rosh-chodesh
   [month-of-year]
   (single-day-feast
-   {:name (str "First day of the "
-               (if (= month-of-year 1)
-                 "year"
-                 (str (nth month-numbers (dec month-of-year))
-                      " month")))
+   {:name (str (nth day-numbers 0)
+               " day of the "
+               (str (nth month-numbers (dec month-of-year)))
+               " month")
     :hebrew-name (str "Rosh Chodesh "
                       (nth trad-month-names (dec month-of-year)))}))
 
@@ -475,12 +482,6 @@
    :day-of-feast 2
    :days-in-feast 2})
 
-(defn- days-between
-  "Given a `start` and an `end`, calculate the duration between the events in
-  days."
-  [start end]
-  (t/as (t/duration start end) :days))
-
 (defn- minor-feast-day?
   "Given `m` (hebrew month of year), `d` (hebrew day of month), return a map
   with details of any minor feast day on that day, or
@@ -498,15 +499,13 @@
   (let [days-in-first-month
           (when (and (= m 3) (<= 5 d 12))
             (as-> (go-forward (t/days 2) start-of-year) <>
-              (zone-it "Asia/Jerusalem" <>)
-              (boundaries-of-month jerusalem-lat jerusalem-lon <>)
-              (days-between (first <>) (second <>))))
+                  (zone-it "Asia/Jerusalem" <>)
+                  (hebrew-days-in-month jerusalem-lat jerusalem-lon <>)))
         days-in-prev-month
           (when (or (and (= m 3) (<= 5 d 12)) (and (= m 10) (< 0 d 4)))
             (as-> (go-back (t/days 2) start-of-month) <>
-              (zone-it "Asia/Jerusalem" <>)
-              (boundaries-of-month jerusalem-lat jerusalem-lon <>)
-              (days-between (first <>) (second <>))))
+                  (zone-it "Asia/Jerusalem" <>)
+                  (hebrew-days-in-month jerusalem-lat jerusalem-lon <>)))
         two-first-months (when (and days-in-first-month days-in-prev-month)
                            (+ days-in-first-month days-in-prev-month))]
     (cond
@@ -576,7 +575,7 @@
 
 (defn- hebrew-date-map
   [lat lon y m date]
-  (let [months-in-y (if (<= 383 (days-between (first y) (last y)) 384) 13 12)
+  (let [months-in-y (hebrew-months-in-year lat lon date)
         moy (hebrew-month-of-year lat lon date)
         dom (hebrew-day-of-month lat lon date)
         dow (hebrew-day-of-week lat lon date)
@@ -584,7 +583,7 @@
     {:month-of-year moy
      :months-in-year months-in-y
      :day-of-month dom
-     :days-in-month (days-between (first m) (last m))
+     :days-in-month (hebrew-days-in-month lat lon date)
      :day-of-week dow
      :sabbath (sabbath? moy dom dow major-feast-day)
      :minor-feast-day (minor-feast-day? moy dom)
@@ -795,23 +794,14 @@
        (apply merge)
        (into (sorted-map))))
 
-(def feast-day-numbers
-  ["First" "Second" "Third" "Fourth" "Fifth" "Sixth" "Last"])
-
 (defn- long-feast-day-name
   [y m d n day-of-feast days-in-feast]
   (str y "-" (format "%02d" m) "-" (format "%02d" d) " "
        (if (< days-in-feast 3)
          n
          (if (= days-in-feast 8)
-           (cond (= 7 day-of-feast) (str "Seventh day of " n)
-                 (= 8 day-of-feast) (str "Last day of " n)
-                 :else
-                 (str (nth feast-day-numbers (dec day-of-feast))
-                      " day of " n))
-           (str (nth feast-day-numbers (dec day-of-feast))
-                " day of the "
-                n)))))
+           (str (nth day-numbers (dec day-of-feast)) " day of " n)
+           (str (nth day-numbers (dec day-of-feast)) " day of the " n)))))
 
 (defn list-of-known-feast-days-in-gregorian-year
   "Given a gregorian `year` between 1584 and 2100, return a list of strings

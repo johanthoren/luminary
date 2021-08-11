@@ -16,6 +16,13 @@
 (def tm-lat 31.7781161)
 (def tm-lon 35.233804)
 
+(deftest test-calculated-feast-days
+  (testing "that the saved feast days are the same as freshly calculated ones"
+    (is (= l/calculated-feast-days
+           (apply merge
+                  (map #'xyz.thoren.luminary/map-of-feast-days-in-gregorian-year
+                       (range 2020 2040)))))))
+
 (defn- time-of-sunset
   [latitude longitude year month day]
   (#'xyz.thoren.luminary/next-start-of-day
@@ -319,9 +326,9 @@
                (is (= %7 (str (get-in h [:time :day :start]))))
                (is (= %1 (get-in h [:hebrew :month-of-year])))
                (is (= %2 (get-in h [:hebrew :day-of-month]))))]
-      (testing "for the first day of the year"
+      (testing "for the first day of the 1st month"
         (t 1 1 2021 5 1 12 "2021-04-12T19:06+03:00[Asia/Jerusalem]"))
-      (testing "for the second day of the year"
+      (testing "for the second day of the 1st month"
         (t 1 2 2021 5 1 12 "2021-04-13T19:06+03:00[Asia/Jerusalem]"))
       (testing "for the third day of the 12th month"
         (t 12 3 2021 5 1 12 "2022-03-05T17:39+02:00[Asia/Jerusalem]")))))
@@ -333,9 +340,9 @@
                (is (= %4 (str (get-in h [:time :day :start]))))
                (is (= %2 (get-in h [:hebrew :month-of-year])))
                (is (= %3 (get-in h [:hebrew :day-of-month]))))]
-      (testing "for the first day of the year"
+      (testing "for the first day of the 1st month"
         (t 2021 1 1 "2021-04-12T19:06+03:00[Asia/Jerusalem]"))
-      (testing "for the second day of the year"
+      (testing "for the second day of the 1st month"
         (t 2021 1 2 "2021-04-13T19:06+03:00[Asia/Jerusalem]"))
       (testing "for the third day of the fourth month"
         (t 2021 4 3 "2021-07-12T19:46+03:00[Asia/Jerusalem]"))
@@ -349,9 +356,9 @@
                (is (= %4 (str (get-in h [:time :day :start]))))
                (is (= %2 (get-in h [:hebrew :month-of-year])))
                (is (= %3 (get-in h [:hebrew :day-of-month]))))]
-      (testing "for the first day of the year"
+      (testing "for the first day of the 1st month"
         (t 2031 1 1 "2031-03-23T17:52+02:00[Asia/Jerusalem]"))
-      (testing "for the second day of the year"
+      (testing "for the second day of the 1st month"
         (t 2031 1 2 "2031-03-24T17:53+02:00[Asia/Jerusalem]"))
       (testing "for the third day of the fourth month"
         (t 2031 4 3 "2031-06-22T19:47+03:00[Asia/Jerusalem]"))
@@ -699,7 +706,23 @@
         (is (= 1 (get-in h [:hebrew :day-of-week])))
         (is (true? (get-in h [:hebrew :sabbath])))
         (is (= "Feast of Weeks" (get-in h [:hebrew :major-feast-day :name])))
-        (is (= "Sivan" (get-in h [:hebrew :names :traditional-month-of-year])))))))
+        (is (= "Sivan" (get-in h [:hebrew :names :traditional-month-of-year]))))
+      (let [h (r 2039 12 16 12 0)]
+        (is (= 9 (get-in h [:hebrew :month-of-year])))
+        (is (= 30 (get-in h [:hebrew :day-of-month])))
+        (is (= 30 (get-in h [:hebrew :days-in-month])))
+        (is (false? (get-in h [:hebrew :sabbath])))
+        (is (= "Hanukkah" (get-in h [:hebrew :major-feast-day :name])))
+        (is (= 6 (get-in h [:hebrew :major-feast-day :day-of-feast])))
+        (is (= "Kislev" (get-in h [:hebrew :names :traditional-month-of-year]))))
+      (let [h (r 2039 12 17 12 0)]
+        (is (= 10 (get-in h [:hebrew :month-of-year])))
+        (is (= 1 (get-in h [:hebrew :day-of-month])))
+        (is (= 29 (get-in h [:hebrew :days-in-month])))
+        (is (true? (get-in h [:hebrew :sabbath])))
+        (is (= "Hanukkah" (get-in h [:hebrew :major-feast-day :name])))
+        (is (= 7 (get-in h [:hebrew :major-feast-day :day-of-feast])))
+        (is (= "Tevet" (get-in h [:hebrew :names :traditional-month-of-year])))))))
 
 (deftest hebrew-dates-at-longyearbyen
   (testing "that some select days are correctly calculated and reported"
@@ -733,90 +756,105 @@
         (is (= 1 (get-in h [:hebrew :day-of-week])))
         (is (true? (get-in h [:hebrew :sabbath])))
         (is (= "Feast of Weeks" (get-in h [:hebrew :major-feast-day :name])))
-        (is (= "Sivan" (get-in h [:hebrew :names :traditional-month-of-year])))))))
+        (is (= "Sivan" (get-in h [:hebrew :names :traditional-month-of-year]))))
+      (let [h (r 2039 12 16 12 0)]
+        (is (= 9 (get-in h [:hebrew :month-of-year])))
+        (is (= 30 (get-in h [:hebrew :day-of-month])))
+        (is (= 30 (get-in h [:hebrew :days-in-month])))
+        (is (false? (get-in h [:hebrew :sabbath])))
+        (is (= "Hanukkah" (get-in h [:hebrew :major-feast-day :name])))
+        (is (= 6 (get-in h [:hebrew :major-feast-day :day-of-feast])))
+        (is (= "Kislev" (get-in h [:hebrew :names :traditional-month-of-year]))))
+      (let [h (r 2039 12 17 12 0)]
+        (is (= 10 (get-in h [:hebrew :month-of-year])))
+        (is (= 1 (get-in h [:hebrew :day-of-month])))
+        (is (= 29 (get-in h [:hebrew :days-in-month])))
+        (is (true? (get-in h [:hebrew :sabbath])))
+        (is (= "Hanukkah" (get-in h [:hebrew :major-feast-day :name])))
+        (is (= 7 (get-in h [:hebrew :major-feast-day :day-of-feast])))
+        (is (= "Tevet" (get-in h [:hebrew :names :traditional-month-of-year])))))))
 
 (deftest test-known-feast-days
   (let [r #(l/list-of-known-feast-days-in-gregorian-year %)
         t #(is (= %2 (r %1)))]
     (testing "testing the known feast days"
       (testing "in 2021"
-        (t 2021 '("2021-01-13 First day of the 11th month"
-                  "2021-02-12 First day of the 12th month"
+        (t 2021 '("2021-01-13 1st day of the 11th month"
+                  "2021-02-12 1st day of the 12th month"
                   "2021-02-25 Purim"
                   "2021-02-26 Shushan Purim"
-                  "2021-03-13 First day of the 13th month"
-                  "2021-04-12 First day of the year"
+                  "2021-03-13 1st day of the 13th month"
+                  "2021-04-12 1st day of the 1st month"
                   "2021-04-25 Passover"
-                  "2021-04-26 First day of the Feast of Unleavened Bread"
-                  "2021-04-27 Second day of the Feast of Unleavened Bread"
-                  "2021-04-28 Third day of the Feast of Unleavened Bread"
-                  "2021-04-29 Fourth day of the Feast of Unleavened Bread"
-                  "2021-04-30 Fifth day of the Feast of Unleavened Bread"
+                  "2021-04-26 1st day of the Feast of Unleavened Bread"
+                  "2021-04-27 2nd day of the Feast of Unleavened Bread"
+                  "2021-04-28 3rd day of the Feast of Unleavened Bread"
+                  "2021-04-29 4th day of the Feast of Unleavened Bread"
+                  "2021-04-30 5th day of the Feast of Unleavened Bread"
                   "2021-05-01 Feast of First Fruits"
-                  "2021-05-02 Last day of the Feast of Unleavened Bread"
-                  "2021-05-12 First day of the 2nd month"
-                  "2021-06-10 First day of the 3rd month"
+                  "2021-05-02 7th day of the Feast of Unleavened Bread"
+                  "2021-05-12 1st day of the 2nd month"
+                  "2021-06-10 1st day of the 3rd month"
                   "2021-06-19 Feast of Weeks"
-                  "2021-07-10 First day of the 4th month"
-                  "2021-08-08 First day of the 5th month"
-                  "2021-09-07 First day of the 6th month"
+                  "2021-07-10 1st day of the 4th month"
+                  "2021-08-08 1st day of the 5th month"
+                  "2021-09-07 1st day of the 6th month"
+                  "2021-10-06 1st day of the 7th month"
                   "2021-10-06 Feast of Trumpets"
-                  "2021-10-06 First day of the 7th month"
                   "2021-10-15 Day of Atonement"
-                  "2021-10-20 First day of the Feast of Tabernacles"
-                  "2021-10-21 Second day of the Feast of Tabernacles"
-                  "2021-10-22 Third day of the Feast of Tabernacles"
-                  "2021-10-23 Fourth day of the Feast of Tabernacles"
-                  "2021-10-24 Fifth day of the Feast of Tabernacles"
-                  "2021-10-25 Sixth day of the Feast of Tabernacles"
-                  "2021-10-26 Last day of the Feast of Tabernacles"
+                  "2021-10-20 1st day of the Feast of Tabernacles"
+                  "2021-10-21 2nd day of the Feast of Tabernacles"
+                  "2021-10-22 3rd day of the Feast of Tabernacles"
+                  "2021-10-23 4th day of the Feast of Tabernacles"
+                  "2021-10-24 5th day of the Feast of Tabernacles"
+                  "2021-10-25 6th day of the Feast of Tabernacles"
+                  "2021-10-26 7th day of the Feast of Tabernacles"
                   "2021-10-27 The Last Great Day"
-                  "2021-11-05 First day of the 8th month"
-                  "2021-12-04 First day of the 9th month"
-                  "2021-12-28 First day of Hanukkah"
-                  "2021-12-29 Second day of Hanukkah"
-                  "2021-12-30 Third day of Hanukkah"
-                  "2021-12-31 Fourth day of Hanukkah")))
+                  "2021-11-05 1st day of the 8th month"
+                  "2021-12-04 1st day of the 9th month"
+                  "2021-12-28 1st day of Hanukkah"
+                  "2021-12-29 2nd day of Hanukkah"
+                  "2021-12-30 3rd day of Hanukkah"
+                  "2021-12-31 4th day of Hanukkah")))
       (testing "in 2039"
-        (t 2039 '("2039-01-24 First day of the 11th month"
-                  "2039-02-23 First day of the 12th month"
+        (t 2039 '("2039-01-24 1st day of the 11th month"
+                  "2039-02-23 1st day of the 12th month"
                   "2039-03-08 Purim"
                   "2039-03-09 Shushan Purim"
-                  "2039-03-25 First day of the year"
+                  "2039-03-25 1st day of the 1st month"
                   "2039-04-07 Passover"
-                  "2039-04-08 First day of the Feast of Unleavened Bread"
+                  "2039-04-08 1st day of the Feast of Unleavened Bread"
                   "2039-04-09 Feast of First Fruits"
-                  "2039-04-10 Third day of the Feast of Unleavened Bread"
-                  "2039-04-11 Fourth day of the Feast of Unleavened Bread"
-                  "2039-04-12 Fifth day of the Feast of Unleavened Bread"
-                  "2039-04-13 Sixth day of the Feast of Unleavened Bread"
-                  "2039-04-14 Last day of the Feast of Unleavened Bread"
-                  "2039-04-23 First day of the 2nd month"
-                  "2039-05-23 First day of the 3rd month"
+                  "2039-04-10 3rd day of the Feast of Unleavened Bread"
+                  "2039-04-11 4th day of the Feast of Unleavened Bread"
+                  "2039-04-12 5th day of the Feast of Unleavened Bread"
+                  "2039-04-13 6th day of the Feast of Unleavened Bread"
+                  "2039-04-14 7th day of the Feast of Unleavened Bread"
+                  "2039-04-23 1st day of the 2nd month"
+                  "2039-05-23 1st day of the 3rd month"
                   "2039-05-28 Feast of Weeks"
-                  "2039-06-22 First day of the 4th month"
-                  "2039-07-21 First day of the 5th month"
-                  "2039-08-20 First day of the 6th month"
+                  "2039-06-22 1st day of the 4th month"
+                  "2039-07-21 1st day of the 5th month"
+                  "2039-08-20 1st day of the 6th month"
+                  "2039-09-18 1st day of the 7th month"
                   "2039-09-18 Feast of Trumpets"
-                  "2039-09-18 First day of the 7th month"
                   "2039-09-27 Day of Atonement"
-                  "2039-10-02 First day of the Feast of Tabernacles"
-                  "2039-10-03 Second day of the Feast of Tabernacles"
-                  "2039-10-04 Third day of the Feast of Tabernacles"
-                  "2039-10-05 Fourth day of the Feast of Tabernacles"
-                  "2039-10-06 Fifth day of the Feast of Tabernacles"
-                  "2039-10-07 Sixth day of the Feast of Tabernacles"
-                  "2039-10-08 Last day of the Feast of Tabernacles"
+                  "2039-10-02 1st day of the Feast of Tabernacles"
+                  "2039-10-03 2nd day of the Feast of Tabernacles"
+                  "2039-10-04 3rd day of the Feast of Tabernacles"
+                  "2039-10-05 4th day of the Feast of Tabernacles"
+                  "2039-10-06 5th day of the Feast of Tabernacles"
+                  "2039-10-07 6th day of the Feast of Tabernacles"
+                  "2039-10-08 7th day of the Feast of Tabernacles"
                   "2039-10-09 The Last Great Day"
-                  "2039-10-18 First day of the 8th month"
-                  "2039-11-16 First day of the 9th month"
-                  "2039-12-10 First day of Hanukkah"
-                  "2039-12-11 Second day of Hanukkah"
-                  "2039-12-12 Third day of Hanukkah"
-                  "2039-12-13 Fourth day of Hanukkah"
-                  "2039-12-14 Fifth day of Hanukkah"
-                  "2039-12-15 Sixth day of Hanukkah"
-                  "2039-12-16 First day of the 10th month"
-                  "2039-12-16 Sixth day of Hanukkah"
-                  "2039-12-17 Seventh day of Hanukkah"
-                  "2039-12-18 Last day of Hanukkah"))))))
+                  "2039-10-18 1st day of the 8th month"
+                  "2039-11-16 1st day of the 9th month"
+                  "2039-12-10 1st day of Hanukkah"
+                  "2039-12-11 2nd day of Hanukkah"
+                  "2039-12-12 3rd day of Hanukkah"
+                  "2039-12-13 4th day of Hanukkah"
+                  "2039-12-14 5th day of Hanukkah"
+                  "2039-12-15 6th day of Hanukkah"
+                  "2039-12-16 1st day of the 10th month"
+                  "2039-12-16 7th day of Hanukkah"
+                  "2039-12-17 8th day of Hanukkah"))))))

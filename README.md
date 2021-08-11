@@ -28,7 +28,7 @@ Examples:
 (l/find-date 5 11)
 ;; => 
 {:hebrew
- {:days-in-month 29,
+ {:days-in-month 30,
   :day-of-week 5,
   :month-of-year 5,
   :minor-feast-day false,
@@ -43,31 +43,23 @@ Examples:
   :months-in-year 12},
  :time
  {:year
-  {:start
-   #object[java.time.ZonedDateTime 0x2460f316 "2021-04-12T19:06+03:00[Asia/Jerusalem]"],
-   :end
-   #object[java.time.ZonedDateTime 0x3c371f7d "2022-04-01T18:57:59+03:00[Asia/Jerusalem]"],
+  {:start #object[java.time.ZonedDateTime 0x7d7f4754 "2021-04-12T19:06+03:00[Asia/Jerusalem]"],
+   :end #object[java.time.ZonedDateTime 0x50fa2316 "2022-04-01T18:57:59+03:00[Asia/Jerusalem]"],
    :start-adjusted-for-polar-region false,
    :end-adjusted-for-polar-region false},
   :month
-  {:start
-   #object[java.time.ZonedDateTime 0x6dab6622 "2021-08-08T19:29+03:00[Asia/Jerusalem]"],
-   :end
-   #object[java.time.ZonedDateTime 0x58df97d4 "2021-09-07T18:54:59+03:00[Asia/Jerusalem]"],
+  {:start #object[java.time.ZonedDateTime 0x757fa215 "2021-08-08T19:29+03:00[Asia/Jerusalem]"],
+   :end #object[java.time.ZonedDateTime 0x6feb8d9e "2021-09-07T18:54:59+03:00[Asia/Jerusalem]"],
    :start-adjusted-for-polar-region false,
    :end-adjusted-for-polar-region false},
   :week
-  {:start
-   #object[java.time.ZonedDateTime 0x6e7ec90a "2021-08-14T19:23+03:00[Asia/Jerusalem]"],
-   :end
-   #object[java.time.ZonedDateTime 0x2ead9123 "2021-08-21T19:15:59+03:00[Asia/Jerusalem]"],
+  {:start #object[java.time.ZonedDateTime 0x123392bd "2021-08-14T19:23+03:00[Asia/Jerusalem]"],
+   :end #object[java.time.ZonedDateTime 0x4228d927 "2021-08-21T19:15:59+03:00[Asia/Jerusalem]"],
    :start-adjusted-for-polar-region false,
    :end-adjusted-for-polar-region false},
   :day
-  {:start
-   #object[java.time.ZonedDateTime 0x2272350f "2021-08-18T19:19+03:00[Asia/Jerusalem]"],
-   :end
-   #object[java.time.ZonedDateTime 0xc320d03 "2021-08-19T19:17:59+03:00[Asia/Jerusalem]"],
+  {:start #object[java.time.ZonedDateTime 0x7c635c18 "2021-08-18T19:19+03:00[Asia/Jerusalem]"],
+   :end #object[java.time.ZonedDateTime 0x439d3674 "2021-08-19T19:17:59+03:00[Asia/Jerusalem]"],
    :start-adjusted-for-polar-region false,
    :end-adjusted-for-polar-region false}}}
 ```
@@ -82,9 +74,9 @@ Examples:
   :minor-feast-day false,
   :day-of-month 14,
   :major-feast-day
-  {:name "Passover",
-   :hebrew-name "Pesach",
-   :day-of-feast 1,
+  {:name "Passover", 
+   :hebrew-name "Pesach", 
+   :day-of-feast 1, 
    :days-in-feast 1},
   :sabbath true,
   :names
@@ -95,31 +87,23 @@ Examples:
   :months-in-year 13},
  :time
  {:year
-  {:start
-   #object[java.time.ZonedDateTime 0xde04680 "2025-03-29T19:32+01:00[Europe/Oslo]"],
-   :end
-   #object[java.time.ZonedDateTime 0x6d9bc7a3 "2026-04-18T00:13:59+02:00[Europe/Oslo]"],
+  {:start #object[java.time.ZonedDateTime 0x7b50d0cc "2025-03-29T19:32+01:00[Europe/Oslo]"],
+   :end #object[java.time.ZonedDateTime 0x183fe2dc "2026-04-18T00:13:59+02:00[Europe/Oslo]"],
    :start-adjusted-for-polar-region false,
    :end-adjusted-for-polar-region false},
   :month
-  {:start
-   #object[java.time.ZonedDateTime 0x9725bac "2025-03-29T19:32+01:00[Europe/Oslo]"],
-   :end
-   #object[java.time.ZonedDateTime 0x79f65d6d "2025-04-28T21:23:59+02:00[Europe/Oslo]"],
+  {:start #object[java.time.ZonedDateTime 0x60f92419 "2025-03-29T19:32+01:00[Europe/Oslo]"],
+   :end #object[java.time.ZonedDateTime 0x48bd469b "2025-04-28T21:23:59+02:00[Europe/Oslo]"],
    :start-adjusted-for-polar-region false,
    :end-adjusted-for-polar-region true},
   :week
-  {:start
-   #object[java.time.ZonedDateTime 0x536c7f18 "2025-04-05T21:31+02:00[Europe/Oslo]"],
-   :end
-   #object[java.time.ZonedDateTime 0x1cde0d39 "2025-04-12T22:43:59+02:00[Europe/Oslo]"],
+  {:start #object[java.time.ZonedDateTime 0x6fc06188 "2025-04-05T21:31+02:00[Europe/Oslo]"],
+   :end #object[java.time.ZonedDateTime 0x337e83c0 "2025-04-12T22:43:59+02:00[Europe/Oslo]"],
    :start-adjusted-for-polar-region false,
    :end-adjusted-for-polar-region false},
   :day
-  {:start
-   #object[java.time.ZonedDateTime 0x54ac8d2e "2025-04-11T22:32+02:00[Europe/Oslo]"],
-   :end
-   #object[java.time.ZonedDateTime 0x5d8d601e "2025-04-12T22:43:59+02:00[Europe/Oslo]"],
+  {:start #object[java.time.ZonedDateTime 0x40883d00 "2025-04-11T22:32+02:00[Europe/Oslo]"],
+   :end #object[java.time.ZonedDateTime 0x9b8598d "2025-04-12T22:43:59+02:00[Europe/Oslo]"],
    :start-adjusted-for-polar-region false,
    :end-adjusted-for-polar-region false}}}
 ```
@@ -129,43 +113,43 @@ at the sunset:
 ``` clojure
 (l/list-of-known-feast-days-in-gregorian-year 2021)
 ;; => 
-("2021-01-13 First day of Shevat"
- "2021-02-12 First day of Adar"
+("2021-01-13 1st day of the 11th month"
+ "2021-02-12 1st day of the 12th month"
  "2021-02-25 Purim"
  "2021-02-26 Shushan Purim"
- "2021-03-13 First day of Adar II"
- "2021-04-12 First day of Nisan"
+ "2021-03-13 1st day of the 13th month"
+ "2021-04-12 1st day of the 1st month"
  "2021-04-25 Passover"
- "2021-04-26 First day of the Feast of Unleavened Bread"
- "2021-04-27 Second day of the Feast of Unleavened Bread"
- "2021-04-28 Third day of the Feast of Unleavened Bread"
- "2021-04-29 Fourth day of the Feast of Unleavened Bread"
- "2021-04-30 Fifth day of the Feast of Unleavened Bread"
+ "2021-04-26 1st day of the Feast of Unleavened Bread"
+ "2021-04-27 2nd day of the Feast of Unleavened Bread"
+ "2021-04-28 3rd day of the Feast of Unleavened Bread"
+ "2021-04-29 4th day of the Feast of Unleavened Bread"
+ "2021-04-30 5th day of the Feast of Unleavened Bread"
  "2021-05-01 Feast of First Fruits"
- "2021-05-02 Last day of the Feast of Unleavened Bread"
- "2021-05-12 First day of Iyar"
- "2021-06-10 First day of Sivan"
+ "2021-05-02 7th day of the Feast of Unleavened Bread"
+ "2021-05-12 1st day of the 2nd month"
+ "2021-06-10 1st day of the 3rd month"
  "2021-06-19 Feast of Weeks"
- "2021-07-10 First day of Tammuz"
- "2021-08-08 First day of Av"
- "2021-09-07 First day of Elul"
+ "2021-07-10 1st day of the 4th month"
+ "2021-08-08 1st day of the 5th month"
+ "2021-09-07 1st day of the 6th month"
+ "2021-10-06 1st day of the 7th month"
  "2021-10-06 Feast of Trumpets"
- "2021-10-06 First day of Tishrei"
  "2021-10-15 Day of Atonement"
- "2021-10-20 First day of the Feast of Tabernacles"
- "2021-10-21 Second day of the Feast of Tabernacles"
- "2021-10-22 Third day of the Feast of Tabernacles"
- "2021-10-23 Fourth day of the Feast of Tabernacles"
- "2021-10-24 Fifth day of the Feast of Tabernacles"
- "2021-10-25 Sixth day of the Feast of Tabernacles"
- "2021-10-26 Last day of the Feast of Tabernacles"
+ "2021-10-20 1st day of the Feast of Tabernacles"
+ "2021-10-21 2nd day of the Feast of Tabernacles"
+ "2021-10-22 3rd day of the Feast of Tabernacles"
+ "2021-10-23 4th day of the Feast of Tabernacles"
+ "2021-10-24 5th day of the Feast of Tabernacles"
+ "2021-10-25 6th day of the Feast of Tabernacles"
+ "2021-10-26 7th day of the Feast of Tabernacles"
  "2021-10-27 The Last Great Day"
- "2021-11-05 First day of Marcheshvan"
- "2021-12-04 First day of Kislev"
- "2021-12-28 First day of Hanukkah"
- "2021-12-29 Second day of Hanukkah"
- "2021-12-30 Third day of Hanukkah"
- "2021-12-31 Fourth day of Hanukkah")
+ "2021-11-05 1st day of the 8th month"
+ "2021-12-04 1st day of the 9th month"
+ "2021-12-28 1st day of Hanukkah"
+ "2021-12-29 2nd day of Hanukkah"
+ "2021-12-30 3rd day of Hanukkah"
+ "2021-12-31 4th day of Hanukkah")
 ```
 
 ## Background
