@@ -79,7 +79,7 @@
             (t 12 20 h "2021-12-20T22:09-03:00[Antarctica/Palmer]")))))))
 
 (deftest temple-mount
-  (testing "sunrise and sunset at the Temple Mount"
+  (testing "sunset at the Temple Mount"
     (let [lat tm-lat
           lon tm-lon
           r #(%1 lat lon %2 %3 %4)
@@ -92,7 +92,7 @@
       (test-string #'time-of-sunset 2021 12 21 "2021-12-21T14:39Z[UTC]"))))
 
 (deftest arvidsjaur
-  (testing "sunrise and sunset in Arvidsjaur, Sweden"
+  (testing "sunset in Arvidsjaur, Sweden"
     (let [lat arvidsjaur-latitude
           lon arvidsjaur-longitude
           r #(%1 lat lon %2 %3 %4)
@@ -105,24 +105,22 @@
       (test-string #'time-of-sunset 2021 12 21 "2021-12-21T12:16Z[UTC]"))))
 
 (deftest longyearbyen
-  (testing "sunrise and sunset in Longyearbyen, Svalbard"
+  (testing "sunset in Longyearbyen, Svalbard"
     (let [lat longyearbyen-latitude
           lon longyearbyen-longitude
           r #(%1 lat lon %2 %3 %4)
           test-string #(is (= %5 (str (r %1 %2 %3 %4))))]
-      ;; The dates where one would expect no sunset are automatically adjusted
-      ;; to be calculated at the latitude 65.7.
-      (test-string #'time-of-sunset 2021 1 1 "2021-01-01T12:45Z[UTC]")
+      (test-string #'time-of-sunset 2021 1 1 "2021-01-02T11:18Z[UTC]")
       (test-string #'time-of-sunset 2021 3 1 "2021-03-01T14:58Z[UTC]")
-      (test-string #'time-of-sunset 2021 4 30 "2021-04-30T19:32Z[UTC]")
-      (test-string #'time-of-sunset 2021 6 22 "2021-06-22T22:46Z[UTC]")
-      (test-string #'time-of-sunset 2021 7 1 "2021-07-01T22:16Z[UTC]")
+      (test-string #'time-of-sunset 2021 4 30 "2021-04-30T22:04Z[UTC]")
+      (test-string #'time-of-sunset 2021 6 22 "2021-06-22T22:52Z[UTC]")
+      (test-string #'time-of-sunset 2021 7 1 "2021-07-01T22:57Z[UTC]")
       (test-string #'time-of-sunset 2021 10 10 "2021-10-10T14:43Z[UTC]")
-      (test-string #'time-of-sunset 2021 11 11 "2021-11-11T13:55Z[UTC]")
-      (test-string #'time-of-sunset 2021 12 21 "2021-12-21T12:28Z[UTC]"))))
+      (test-string #'time-of-sunset 2021 11 11 "2021-11-12T11:26Z[UTC]")
+      (test-string #'time-of-sunset 2021 12 21 "2021-12-22T11:17Z[UTC]"))))
 
 (deftest puerto-williams
-  (testing "sunrise and sunset in Puerto Williams, Chile"
+  (testing "sunset in Puerto Williams, Chile"
     (let [lat puerto-williams-latitude
           lon puerto-williams-longitude
           r #(%1 lat lon %2 %3 %4)
@@ -135,20 +133,20 @@
       (test-string #'time-of-sunset 2021 12 21 "2021-12-22T01:09Z[UTC]"))))
 
 (deftest mcmurdo
-  (testing "sunrise and sunset at McMurdo station, Antarctica"
+  (testing "sunset at McMurdo station, Antarctica"
     (let [lat mcmurdo-latitude
           lon mcmurdo-longitude
           r #(%1 lat lon %2 %3 %4)
           test-string #(is (= %5 (str (r %1 %2 %3 %4))))]
       ;; The dates where one would expect no sunset are automatically adjusted
       ;; to be calculated at the latitude -65.7.
-      (test-string #'time-of-sunset 2021 1 1 "2021-01-01T12:07Z[UTC]")
+      (test-string #'time-of-sunset 2021 1 1 "2021-01-01T12:40Z[UTC]")
       (test-string #'time-of-sunset 2021 3 1 "2021-03-02T09:46Z[UTC]")
-      (test-string #'time-of-sunset 2021 4 30 "2021-05-01T04:33Z[UTC]")
-      (test-string #'time-of-sunset 2021 6 22 "2021-06-23T02:27Z[UTC]")
-      (test-string #'time-of-sunset 2021 7 1 "2021-07-02T02:39Z[UTC]")
+      (test-string #'time-of-sunset 2021 4 30 "2021-05-01T02:11Z[UTC]")
+      (test-string #'time-of-sunset 2021 6 22 "2021-06-23T01:49Z[UTC]")
+      (test-string #'time-of-sunset 2021 7 1 "2021-07-02T02:07Z[UTC]")
       (test-string #'time-of-sunset 2021 10 10 "2021-10-11T09:23Z[UTC]")
-      (test-string #'time-of-sunset 2021 11 11 "2021-11-12T09:51Z[UTC]")
+      (test-string #'time-of-sunset 2021 11 11 "2021-11-12T11:43Z[UTC]")
       (test-string #'time-of-sunset 2021 12 21 "2021-12-21T12:42Z[UTC]"))))
 
 (deftest new-moons
