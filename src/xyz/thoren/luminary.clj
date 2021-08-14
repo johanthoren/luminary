@@ -473,41 +473,37 @@
    "Tevet" "Shevat" "Adar" "Adar II"])
 
 (def month-numbers
-  (flatten ["1st" "2nd" "3rd" (map #(str % "th") (range 4 14))]))
+  (vec (flatten ["1st" "2nd" "3rd" (map #(str % "th") (range 4 14))])))
 
 (def day-numbers
-  (flatten ["1st" "2nd" "3rd" (map #(str % "th") (range 4 21)) "21st" "22nd"
-            "23rd" (map #(str % "th") (range 24 31))]))
+  (vec (flatten ["1st" "2nd" "3rd" (map #(str % "th") (range 4 21))
+                 "21st" "22nd" "23rd" (map #(str % "th") (range 24 31))])))
 
 (def weekday-names
-  (flatten [(map #(str % " day of the week")
-              ["1st" "2nd" "3rd" "4th" "5th" "6th"]) "Sabbath"]))
+  (as-> ["1st" "2nd" "3rd" "4th" "5th" "6th"] <>
+        (mapv #(str % " day of the week") <>)
+        (conj <> "Sabbath")))
 
-(defn- single-day-feast
-  [m]
-  (assoc m
-    :day-of-feast 1
-    :days-in-feast 1))
+(defn- single-day-feast [feast] (assoc feast :day-of-feast 1, :days-in-feast 1))
+
+(defn- multi-day-feast
+  [day-of-feast days-in-feast feast]
+  (assoc feast :day-of-feast day-of-feast, :days-in-feast days-in-feast))
 
 (defn- rosh-chodesh
-  [month-of-year]
+  "Return a string representing the 1st day of the `m` month of the year."
+  [m]
+  {:pre [(< 0 m 14)]}
   (single-day-feast
-   {:name (str (nth day-numbers 0)
-               " day of the "
-               (str (nth month-numbers (dec month-of-year)))
-               " month")
-    :hebrew-name (str "Rosh Chodesh "
-                      (nth trad-month-names (dec month-of-year)))}))
+   {:name (str (day-numbers 0) " day of the " (month-numbers (dec m)) " month")
+    :hebrew-name (str "Rosh Chodesh " (trad-month-names (dec m)))}))
 
-(def pesach (single-day-feast {:name "Passover"
-                               :hebrew-name "Pesach"}))
+(def pesach (single-day-feast {:name "Passover", :hebrew-name "Pesach"}))
 
 (defn- ha-matzot
   [day-of-feast]
-  {:name "Feast of Unleavened Bread"
-   :hebrew-name "Chag Ha-Matzot"
-   :day-of-feast day-of-feast
-   :days-in-feast 7})
+  (multi-day-feast day-of-feast 7 {:name "Feast of Unleavened Bread"
+                                   :hebrew-name "Chag Ha-Matzot"}))
 
 (def yom-bikkurim
   (single-day-feast {:name "Feast of First Fruits"
@@ -520,15 +516,12 @@
 
 (defn- ha-sukkot
   [day-of-feast]
-  {:name "Feast of Tabernacles"
-   :alternative-name "Feast of Booths"
-   :hebrew-name "Chag Ha-Sukkot"
-   :day-of-feast day-of-feast
-   :days-in-feast 7})
+  (multi-day-feast day-of-feast 7 {:name "Feast of Tabernacles"
+                                   :alternative-name "Feast of Booths"
+                                   :hebrew-name "Chag Ha-Sukkot"}))
 
 (def yom-teruah
-  (single-day-feast {:name "Feast of Trumpets"
-                     :hebrew-name "Yom Teruah"}))
+  (single-day-feast {:name "Feast of Trumpets", :hebrew-name "Yom Teruah"}))
 
 (def yom-ha-kippurim
   (single-day-feast {:name "Day of Atonement"
@@ -541,10 +534,7 @@
 
 (defn- chanukah
   [day-of-feast]
-  {:name "Hanukkah"
-   :hebrew-name "Chanukah"
-   :day-of-feast day-of-feast
-   :days-in-feast 8})
+  (multi-day-feast day-of-feast 8 {:name "Hanukkah", :hebrew-name "Chanukah"}))
 
 (def purim
   {:name "Purim"
@@ -560,8 +550,8 @@
 
 (defn- minor-feast-day?
   "Given `m` (hebrew month of year), `d` (hebrew day of month), return a map
-  with details of any minor feast day on that day, or
-  return false if there are none."
+  with details of any minor feast day on that day, or return false if there are
+  none."
   [m d]
   (cond
     (= d 1) (rosh-chodesh m)
@@ -574,14 +564,14 @@
   [m d dow start-of-year start-of-month]
   (let [days-in-first-month
           (when (and (= m 3) (<= 5 d 12))
-            (as-> (go-forward (t/days 2) start-of-year) <>
-                  (zone-it "Asia/Jerusalem" <>)
-                  (hebrew-days-in-month jerusalem-lat jerusalem-lon <>)))
+            (->> (go-forward (t/days 2) start-of-year)
+                 (zone-it "Asia/Jerusalem")
+                 (hebrew-days-in-month jerusalem-lat jerusalem-lon)))
         days-in-prev-month
           (when (or (and (= m 3) (<= 5 d 12)) (and (= m 10) (< 0 d 4)))
-            (as-> (go-back (t/days 2) start-of-month) <>
-                  (zone-it "Asia/Jerusalem" <>)
-                  (hebrew-days-in-month jerusalem-lat jerusalem-lon <>)))
+            (->> (go-back (t/days 2) start-of-month)
+                 (zone-it "Asia/Jerusalem")
+                 (hebrew-days-in-month jerusalem-lat jerusalem-lon)))
         two-first-months (when (and days-in-first-month days-in-prev-month)
                            (+ days-in-first-month days-in-prev-month))]
     (cond
@@ -641,13 +631,13 @@
 
 (defn- hebrew-names
   [month-of-year months-in-year day-of-month day-of-week]
-  {:month-of-year (nth month-numbers (dec month-of-year))
+  {:month-of-year (month-numbers (dec month-of-year))
    :traditional-month-of-year
      (if (and (= month-of-year 12) (= months-in-year 13))
        "Adar I"
-       (nth trad-month-names (dec month-of-year)))
-   :day-of-month (nth day-numbers (dec day-of-month))
-   :day-of-week (nth weekday-names (dec day-of-week))})
+       (trad-month-names (dec month-of-year)))
+   :day-of-month (day-numbers (dec day-of-month))
+   :day-of-week (weekday-names (dec day-of-week))})
 
 (defn- hebrew-date-map
   [lat lon y m date]
@@ -856,10 +846,10 @@
 (defn- map-of-feast-days-in-gregorian-year
   [year]
   (let [dates (calculate-feast-days-in-gregorian-year year)]
-    (as-> (for [d dates]
-            {(second (first d)) {(last (first d)) (into [] (rest d))}}) <>
-      (apply merge-with into <>)
-      {year <>})))
+    (->> (for [d dates]
+           {(second (first d)) {(last (first d)) (vec (rest d))}})
+         (apply merge-with into)
+         (hash-map year))))
 
 (defn- feast-days-in-range-of-gregorian-years
   [start end]
@@ -868,14 +858,18 @@
        (apply merge)
        (into (sorted-map))))
 
+(defn- iso-date
+  [y m d]
+  (str y "-" (format "%02d" m) "-" (format "%02d" d)))
+
 (defn- long-feast-day-name
   [y m d n day-of-feast days-in-feast]
-  (str y "-" (format "%02d" m) "-" (format "%02d" d) " "
+  (str (iso-date y m d) " "
        (if (< days-in-feast 3)
          n
          (if (= days-in-feast 8)
-           (str (nth day-numbers (dec day-of-feast)) " day of " n)
-           (str (nth day-numbers (dec day-of-feast)) " day of the " n)))))
+           (str (day-numbers (dec day-of-feast)) " day of " n)
+           (str (day-numbers (dec day-of-feast)) " day of the " n)))))
 
 (defn list-of-known-feast-days-in-gregorian-year
   "Given a gregorian `year` between 1584 and 2100, return a list of strings
@@ -883,12 +877,10 @@
   on which the sunset would begin the feast day in question. Some days will have
   more than one feast day."
   [year]
-  (let [c (if (get calculated-feast-days year)
-            calculated-feast-days
-            (map-of-feast-days-in-gregorian-year year))
-        y (get c year)]
+  (let [y (or (calculated-feast-days year)
+              (map-of-feast-days-in-gregorian-year year))]
     (sort (for [m (keys y)
-                d (keys (get y m))
+                d (keys (y m))
                 f (get-in y [m d])]
             (let [n (:name f)
                   day-of-feast (:day-of-feast f)
