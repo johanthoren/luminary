@@ -83,7 +83,40 @@
       (.timezone ^SunTimes$SunTimesBuilder <> t)
       (.execute ^SunTimes$SunTimesBuilder <>))))
 
-(defn- next-sunset
+(defn- b-
+  [a b]
+  (float (- (bigdec a) (bigdec b))))
+
+(defn- b+
+  [a b]
+  (float (+ (bigdec a) (bigdec b))))
+
+(defn- towards-polar-circle
+  [lat]
+  {:pre [(<= -90 lat 90)]}
+  (cond
+   (<= -65.7 lat 65.7) lat
+   (<= 65.7 lat 65.8) 65.7
+   (>= -65.7 lat -65.8) -65.7
+   (<= 65.8 lat 67) (b- lat 0.1)
+   (>= -65.8 lat -67) (b+ lat 0.1)
+   (<= 67 lat 70) (b- lat 0.3)
+   (>= -67 lat 70) (b+ lat 0.3)
+   (<= 70 lat 75) (b- lat 0.5)
+   (>= -70 lat -75) (b+ lat 0.5)
+   (neg? lat) (inc lat)
+   :else (dec lat)))
+
+(defn next-sunset
+  "Given `lat` and `lon` for a location, and a java.time.ZonedDateTime object
+  `date` in the timezone that corresponds to that location, return a map
+  containing the next following sunset for that date.
+
+  If the sun is either always up or always down, the function will re-run with
+  the latitude incremently adjusted to get closer to the equator until a sunset
+  can be observed.
+
+  See also `calculate-sun-events`."
   [lat lon date & {:keys [adjusted] :or {adjusted false}}]
   (let [sun ^SunTimes (calculate-sun-events lat lon date)
         always-up (.isAlwaysUp sun)
@@ -91,23 +124,22 @@
         sunset (.getSet sun)]
     (cond
       (or always-down always-up)
-      (cond (< lat -65.7) (next-sunset -65.7 lon date :adjusted true)
-            (> lat 65.7) (next-sunset 65.7 lon date :adjusted true)
-            :else (throw
-                   (Exception.
-                    (str "Sun either always up or always down but"
-                         " latitude is: " lat))))
-      (nil? sunset) ;; This seems to happen when the sunset occurred
-                    ;; the minute before `date`.
-      (next-sunset lat
-                   lon
-                   (go-forward (t/minutes 1) date)
-                   :adjusted
-                   adjusted)
+      (cond (< lat -65.7)
+            (next-sunset (towards-polar-circle lat) lon date :adjusted true)
+            (> lat 65.7)
+            (next-sunset (towards-polar-circle lat) lon date :adjusted true)
+            :else (throw (Exception. (str "Sun either always up or always down"
+                                          " but latitude is: " lat))))
+      ;; This seems to happen when the sunset occurred just before `date`.
+      (nil? sunset)
+      (next-sunset lat lon (go-forward (t/minutes 1) date) :adjusted adjusted)
       :else {:sunset (t/truncate-to sunset :minutes)
              :adjusted-for-polar-region adjusted
              :always-down always-down
-             :always-up always-up})))
+             :always-up always-up
+             :lat lat
+             :lon lon
+             :date date})))
 
 (defn- next-start-of-day
   [lat lon date]
@@ -288,11 +320,12 @@
                   (go-forward (t/days %))
                   (go-back (t/hours 8))
                   (noon lat lon)
+                  (go-back (t/hours 6))
                   (next-start-of-day lat lon)))
        (dedupe)
        ;; Since the day sometimes starts after local midnight, due to DST
-       (filter #(or (and (t/saturday? %) (>= (t/as % :hour-of-day) 12))
-                    (and (t/sunday? %) (< (t/as % :hour-of-day) 12))))
+       (filter #(or (and (t/saturday? %) (>= (t/as % :hour-of-day) 2))
+                    (and (t/sunday? %) (< (t/as % :hour-of-day) 2))))
        (first)))
 
 (defn- previous-start-of-week
@@ -351,6 +384,7 @@
                     (go-forward (t/days %))
                     (go-back (t/hours 2))
                     (noon lat lon)
+                    (go-back (t/hours 6))
                     (next-start-of-day lat lon)))
          (dedupe)
          (filter #(t/before? % end-of-month))
