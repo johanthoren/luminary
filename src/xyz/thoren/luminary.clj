@@ -6,11 +6,20 @@
                                           MoonPhase MoonPhase$MoonPhaseBuilder)
            (java.time ZonedDateTime)))
 
-(def jerusalem-lat 31.7781161)
-(def jerusalem-lon 35.233804)
-(def jerusalem-tz "Asia/Jerusalem")
+(def jerusalem-lat
+  "The Latitude of the Temple Mount in Jerusalem, Israel."
+  31.7781161)
+
+(def jerusalem-lon
+  "The Longitude of the Temple Mount in Jerusalem, Israel."
+  35.233804)
+
+(def jerusalem-tz
+  "A string representing the ZoneRegion of Jerusalem, Israel."
+  "Asia/Jerusalem")
 
 (def calculated-feast-days
+  "A map of pre-calculated feast days covering the years 2020-2039."
   (apply merge [fd/feasts-2020
                 fd/feasts-2021
                 fd/feasts-2022
@@ -32,17 +41,25 @@
                 fd/feasts-2038
                 fd/feasts-2039]))
 
-(defn- valid-zone-id?
+(defn valid-zone-id?
+  "Given a string `s`, test if it can be transformed into a valid
+  java.time.ZoneRegion. Passing a java-time.ZoneRegion object will also return
+  true."
   [s]
   (t/zone-id? (try (t/zone-id s) (catch Exception _e nil))))
 
 (defn zone-it
-  "Given a string containing a valid timezone name `tz`, and a
-  java.time.ZonedDateTime object `date`, convert `date` to the same instant in
-  `tz`."
+  "Given a valid timezone `tz` (either a string or a java.time.ZoneRegion
+  object), and a java.time.ZonedDateTime object `date`, convert `date` to the
+  same instant in `tz`."
   [tz date]
   {:pre [(valid-zone-id? tz) (t/zoned-date-time? date)]}
   (t/with-zone-same-instant date tz))
+
+(defn now
+  "Return the current time using the system timezone."
+  []
+  (t/zoned-date-time))
 
 (defn make-zoned-date
   "Given a string containing a valid timezone name `tz`, and at least 3
@@ -61,19 +78,44 @@
   [& args]
   (apply make-zoned-date (cons "UTC" args)))
 
-(defn- tz? [date] (t/zone-id date))
+(defn tz?
+  "Return the java.time.ZoneRegion of java.time.ZonedDateTime object `date`."
+  [date]
+  {:pre [(t/zoned-date-time? date)]}
+  (t/zone-id date))
 
-(defn- go-back [adjustment date] (t/adjust date t/minus adjustment))
+(defn go-back
+  "Subtract `adjustment` from `date`.
 
-(defn- go-forward [adjustment date] (t/adjust date t/plus adjustment))
+  Example: (go-back (t/hours 1) (now))"
+  [adjustment date]
+  (t/adjust date t/minus adjustment))
 
-(defn- date-of-march-equinox
+(defn go-forward
+  "Add `adjustment` to `date`.
+
+  Example: (go-forward (t/hours 1) (now))"
+  [adjustment date]
+  (t/adjust date t/plus adjustment))
+
+(defn time-of-march-equinox
+  "Given an integer `year`, return the time of the March Equinox of that year as
+  a java.time.ZonedDateTime object in UTC."
   [year]
   (->> [:year :month :day :hour :minute :second]
        (map #(% (march-equinox year)))
        (apply make-utc-date)))
 
-(defn- calculate-sun-events
+(defn calculate-sun-events
+  "Given `lat` and `lon` for a location, and a java.time.ZonedDateTime object
+  `date` in the timezone that corresponds to that location, return an
+  org.shredzone.commons.suncalc.SunTimes object describing the sun events
+  following `date`.
+
+  See also `tz?`.
+
+  Example:
+  (31.7781161 35.233804 (make-zoned-date \"Asia/Jerusalem\" 2021 6 1 12))"
   [lat lon ^ZonedDateTime date]
   (let [t (str (tz? date))]
     (as-> (SunTimes/compute) <>
@@ -238,24 +280,24 @@
   [date]
   (let [tz (tz? date)
         year (Integer/parseInt (str (t/year date)))
-        same-year-march-equinox (date-of-march-equinox year)]
+        same-year-march-equinox (time-of-march-equinox year)]
     (if (t/before? date same-year-march-equinox)
       (zone-it tz same-year-march-equinox)
-      (zone-it tz (date-of-march-equinox (inc year))))))
+      (zone-it tz (time-of-march-equinox (inc year))))))
 
 (defn- previous-march-equinox
   [date]
   (let [tz (tz? date)
         year (Integer/parseInt (str (t/year date)))
-        same-year-march-equinox (date-of-march-equinox year)]
+        same-year-march-equinox (time-of-march-equinox year)]
     (if (t/before? same-year-march-equinox date)
       (zone-it tz same-year-march-equinox)
-      (zone-it tz (date-of-march-equinox (dec year))))))
+      (zone-it tz (time-of-march-equinox (dec year))))))
 
 (defn- next-start-of-year-in-israel
   [date]
   (let [zdate (zone-it jerusalem-tz date)
-        this-year-march-equinox (date-of-march-equinox (t/as zdate :year))
+        this-year-march-equinox (time-of-march-equinox (t/as zdate :year))
         previous-month (previous-start-of-month-in-israel zdate)
         pme (previous-march-equinox zdate)
         moon-following-previous-equinox (next-new-moon pme)
@@ -648,8 +690,6 @@
                               :month {:start (first m) :end (last m)}
                               :week {:start (first w) :end (last w)}
                               :day {:start (first d) :end (last d)}}))
-
-(defn now "Return the current time." [] (t/zoned-date-time))
 
 (defn hebrew-date
   "Return a map containing the details of a `hebrew-date` where:
