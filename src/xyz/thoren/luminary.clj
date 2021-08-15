@@ -107,7 +107,7 @@
   following `date`.
 
   Example:
-  (31.7781161 35.233804 (make-zoned-date \"Asia/Jerusalem\" 2021 6 1 12))"
+  (calculate-sun-events 31 35 (make-zoned-date \"Asia/Jerusalem\" 2021 6 1 12))"
   [lat lon ^ZonedDateTime date]
   (let [t (str (t/zone-id date))]
     (as-> (SunTimes/compute) <>
