@@ -78,12 +78,6 @@
   [& args]
   (apply make-zoned-date (cons "UTC" args)))
 
-(defn tz?
-  "Return the java.time.ZoneRegion of java.time.ZonedDateTime object `date`."
-  [date]
-  {:pre [(t/zoned-date-time? date)]}
-  (t/zone-id date))
-
 (defn go-back
   "Subtract `adjustment` from `date`.
 
@@ -112,12 +106,10 @@
   org.shredzone.commons.suncalc.SunTimes object describing the sun events
   following `date`.
 
-  See also `tz?`.
-
   Example:
   (31.7781161 35.233804 (make-zoned-date \"Asia/Jerusalem\" 2021 6 1 12))"
   [lat lon ^ZonedDateTime date]
-  (let [t (str (tz? date))]
+  (let [t (str (t/zone-id date))]
     (as-> (SunTimes/compute) <>
       (.on ^SunTimes$SunTimesBuilder <> date)
       (.at ^SunTimes$SunTimesBuilder <> lat lon)
@@ -196,7 +188,7 @@
 
 (defn- noon
   [lat lon date]
-  (let [tz (tz? date)
+  (let [tz (t/zone-id date)
         year (t/as date :year)
         month (t/as date :month-of-year)
         day (t/as date :day-of-month)
@@ -213,7 +205,7 @@
 
 (defn- calculate-new-moon
   [^ZonedDateTime date]
-  (let [t (str (tz? date))]
+  (let [t (str (t/zone-id date))]
     (as-> (MoonPhase/compute) <>
       (.on ^MoonPhase$MoonPhaseBuilder <> date)
       (.timezone ^MoonPhase$MoonPhaseBuilder <> t)
@@ -254,7 +246,7 @@
 
 (defn- next-start-of-month
   [lat lon date]
-  (let [tz (tz? date)
+  (let [tz (t/zone-id date)
         prev-month-israel (previous-start-of-month-in-israel date)
         next-month-israel (next-start-of-month-in-israel date)
         next-day (next-start-of-day lat lon date)]
@@ -279,7 +271,7 @@
 
 (defn- next-march-equinox
   [date]
-  (let [tz (tz? date)
+  (let [tz (t/zone-id date)
         year (Integer/parseInt (str (t/year date)))
         same-year-march-equinox (time-of-march-equinox year)]
     (if (t/before? date same-year-march-equinox)
@@ -288,7 +280,7 @@
 
 (defn- previous-march-equinox
   [date]
-  (let [tz (tz? date)
+  (let [tz (t/zone-id date)
         year (Integer/parseInt (str (t/year date)))
         same-year-march-equinox (time-of-march-equinox year)]
     (if (t/before? same-year-march-equinox date)
@@ -328,7 +320,7 @@
 
 (defn- next-start-of-year
   [lat lon date]
-  (let [tz (tz? date)
+  (let [tz (t/zone-id date)
         prev-year-israel (previous-start-of-year-in-israel date)
         next-year-israel (next-start-of-year-in-israel date)
         next-day (next-start-of-day lat lon date)]
@@ -343,7 +335,7 @@
   [lat lon date]
   (let [y (t/as date :year)
         m (t/as date :month-of-year)
-        tz (tz? date)]
+        tz (t/zone-id date)]
     (cond (> m 4) (next-start-of-year lat lon (make-zoned-date tz y 2 1))
           (< m 3) (next-start-of-year lat lon (make-zoned-date tz (dec y) 2 1))
           :else (->> (next-start-of-year lat lon date)
