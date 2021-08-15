@@ -856,13 +856,6 @@
          (apply merge-with into)
          (hash-map year))))
 
-(defn- feast-days-in-range-of-gregorian-years
-  [start end]
-  (->> (range start (inc end))
-       (map map-of-feast-days-in-gregorian-year)
-       (apply merge)
-       (into (sorted-map))))
-
 (defn- iso-date
   [y m d]
   (str y "-" (format "%02d" m) "-" (format "%02d" d)))
