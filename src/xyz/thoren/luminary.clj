@@ -879,7 +879,12 @@
   "Given a gregorian `year` between 1584 and 2100, return a list of strings
   describing the feast days in that year. The dates represent the gregorian day
   on which the sunset would begin the feast day in question. Some days will have
-  more than one feast day."
+  more than one feast day.
+
+  Note: The years 2020-2039 are pre-calculated and defined in
+  `calculated-feast-days`, which will be used for years that it contains. If the
+  `year` is outside of this range there will be quite some computational time
+  added."
   [year]
   (let [y (or (calculated-feast-days year)
               (map-of-feast-days-in-gregorian-year year))]
