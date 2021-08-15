@@ -537,16 +537,10 @@
   (multi-day-feast day-of-feast 8 {:name "Hanukkah", :hebrew-name "Chanukah"}))
 
 (def purim
-  {:name "Purim"
-   :hebrew-name "Purim"
-   :day-of-feast 1
-   :days-in-feast 2})
+  (multi-day-feast 1 2 {:name "Purim", :hebrew-name "Purim"}))
 
 (def shushan-purim
-  {:name "Shushan Purim"
-   :hebrew-name "Shushan Purim"
-   :day-of-feast 2
-   :days-in-feast 2})
+  (multi-day-feast 2 2 {:name "Shushan Purim", :hebrew-name "Shushan Purim"}))
 
 (defn- minor-feast-day?
   "Given `m` (hebrew month of year), `d` (hebrew day of month), return a map
