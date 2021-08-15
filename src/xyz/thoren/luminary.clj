@@ -69,18 +69,18 @@
   "Given a string containing a valid timezone name `tz`, and at least 3
   integers, return a ZonedDateTime object. Accepts between 3 and 7 integer
   arguments representing year, month, day, hour, minute, second, nanos."
-  [tz & args]
+  [tz & more]
   {:pre [(valid-zone-id? tz)
-         (empty? (remove int? args))
-         (<= 3 (count args) 7)]}
-  (t/with-zone (apply t/zoned-date-time args) tz))
+         (empty? (remove int? more))
+         (<= 3 (count more) 7)]}
+  (t/with-zone (apply t/zoned-date-time more) tz))
 
 (defn make-utc-date
   "Given at least 3 integers, return a ZonedDateTime object in the UTC timezone.
   Accepts between 3 and 7 arguments representing year, month, day, hour, minute,
   second, nanos."
-  [& args]
-  (apply make-zoned-date (cons "UTC" args)))
+  [& more]
+  (apply make-zoned-date (cons "UTC" more)))
 
 (defn go-back
   "Subtract `adjustment` from `date`.
@@ -97,11 +97,11 @@
   (t/adjust date t/plus adjustment))
 
 (defn time-of-march-equinox
-  "Given an integer `year`, return the time of the March Equinox of that year as
+  "Given the year `n`, return the time of the March Equinox of that year as
   a java.time.ZonedDateTime object in UTC."
-  [year]
+  [n]
   (->> [:year :month :day :hour :minute :second]
-       (map #(% (march-equinox year)))
+       (map #(% (march-equinox n)))
        (apply make-utc-date)))
 
 (defn calculate-sun-events
@@ -122,12 +122,12 @@
       (.execute ^SunTimes$SunTimesBuilder <>))))
 
 (defn- bigdec-
-  [a b]
-  (float (- (bigdec a) (bigdec b))))
+  [x y]
+  (float (- (bigdec x) (bigdec y))))
 
 (defn- bigdec+
-  [a b]
-  (float (+ (bigdec a) (bigdec b))))
+  [x y]
+  (float (+ (bigdec x) (bigdec y))))
 
 (defn- towards-polar-circle
   [lat]
@@ -491,19 +491,19 @@
   (conj (mapv #(str % " day of the week") ["1st" "2nd" "3rd" "4th" "5th" "6th"])
         "Sabbath"))
 
-(defn- single-day-feast [feast] (assoc feast :day-of-feast 1, :days-in-feast 1))
+(defn- single-day-feast [m] (assoc m :day-of-feast 1, :days-in-feast 1))
 
 (defn- multi-day-feast
-  [day-of-feast days-in-feast feast]
-  (assoc feast :day-of-feast day-of-feast, :days-in-feast days-in-feast))
+  [day-of-feast days-in-feast m]
+  (assoc m :day-of-feast day-of-feast, :days-in-feast days-in-feast))
 
 (defn- rosh-chodesh
-  "Return a string representing the 1st day of the `m` month of the year."
-  [m]
-  {:pre [(< 0 m 14)]}
+  "Return a string representing the 1st day of the `n` month of the year."
+  [n]
+  {:pre [(< 0 n 14)]}
   (single-day-feast
-   {:name (str (day-numbers 0) " day of the " (month-numbers (dec m)) " month")
-    :hebrew-name (str "Rosh Chodesh " (trad-month-names (dec m)))}))
+   {:name (str (day-numbers 0) " day of the " (month-numbers (dec n)) " month")
+    :hebrew-name (str "Rosh Chodesh " (trad-month-names (dec n)))}))
 
 (def pesach (single-day-feast {:name "Passover", :hebrew-name "Pesach"}))
 
@@ -549,13 +549,13 @@
 (def shushan-purim
   (multi-day-feast 2 2 {:name "Shushan Purim", :hebrew-name "Shushan Purim"}))
 
-(defn- minor-feast-day?
-  "Given `m` (hebrew month of year), `d` (hebrew day of month), return a map
+(defn- minor-feast-day
+  "Given the hebrew `month-of-year` and the hebrew `day-of-month`, return a map
   with details of any minor feast day on that day, or return false if there are
   none."
-  [m d]
+  [month-of-year day-of-month]
   (cond
-    (= d 1) (rosh-chodesh m)
+    (= day-of-month 1) (rosh-chodesh month-of-year)
     :else false))
 
 (defn- days-in-first-month
@@ -570,7 +570,7 @@
        (zone-it "Asia/Jerusalem")
        (hebrew-days-in-month jerusalem-lat jerusalem-lon)))
 
-(defn- major-feast-day?
+(defn- major-feast-day
   "Given `m` (hebrew month of year), `d` (hebrew day of month), and `dow`
   (hebrew day of week), return a map with details of any major feast day on that
   day, or return false if there are none."
@@ -656,14 +656,14 @@
         moy (hebrew-month-of-year lat lon date)
         dom (hebrew-day-of-month lat lon date)
         dow (hebrew-day-of-week lat lon date)
-        major-feast-day (major-feast-day? moy dom dow (first y) (first m))]
+        major-feast-day (major-feast-day moy dom dow (first y) (first m))]
     {:month-of-year moy
      :months-in-year months-in-y
      :day-of-month dom
      :days-in-month (hebrew-days-in-month lat lon date)
      :day-of-week dow
      :sabbath (sabbath? moy dom dow major-feast-day)
-     :minor-feast-day (minor-feast-day? moy dom)
+     :minor-feast-day (minor-feast-day moy dom)
      :major-feast-day major-feast-day
      :names (hebrew-names moy months-in-y dom dow)}))
 
@@ -686,11 +686,11 @@
   (into (empty m) (for [[k v] m] [k (assoc-polar-status lat lon v)])))
 
 (defn- hebrew-time-map
-  [lat lon y m w d]
-  (with-polar-status lat lon {:year {:start (first y) :end (last y)}
-                              :month {:start (first m) :end (last m)}
-                              :week {:start (first w) :end (last w)}
-                              :day {:start (first d) :end (last d)}}))
+  [lat lon year month week day]
+  (with-polar-status lat lon {:year {:start (first year) :end (last year)}
+                              :month {:start (first month) :end (last month)}
+                              :week {:start (first week) :end (last week)}
+                              :day {:start (first day) :end (last day)}}))
 
 (defn hebrew-date
   "Return a map containing the details of a `hebrew-date` where:
@@ -720,6 +720,9 @@
   of scope of this library.
 
   See also `zone-it`, `hebrew-date-map`, `hebrew-time-map`, and `now`."
+  ([] (hebrew-date (zone-it jerusalem-tz (now))))
+  ([date] (hebrew-date jerusalem-lat jerusalem-lon date))
+  ([lat lon] (hebrew-date lat lon (now)))
   ([lat lon date]
    {:pre [(and (number? lat) (<= -90 lat 90))
           (and (number? lon) (<= -180 lon 180))
@@ -730,10 +733,7 @@
          w (boundaries-of-week lat lon date)
          d (boundaries-of-day lat lon date)]
      {:hebrew (hebrew-date-map lat lon y m date)
-      :time (hebrew-time-map lat lon y m w d)}))
-  ([lat lon] (hebrew-date lat lon (now)))
-  ([date] (hebrew-date jerusalem-lat jerusalem-lon date))
-  ([] (hebrew-date (zone-it jerusalem-tz (now)))))
+      :time (hebrew-time-map lat lon y m w d)})))
 
 (defn find-date
   "Return a map containing the details of a `hebrew-date` where:
@@ -766,6 +766,8 @@
   of scope of this library.
 
   See also `hebrew-date`, `zone-it`, and `now`."
+  ([m d] (find-date m d (zone-it jerusalem-tz (now))))
+  ([m d date] (find-date jerusalem-lat jerusalem-lon m d date))
   ([lat lon m d date]
    {:pre [(t/zoned-date-time? date)
           (and (pos-int? m) (< 0 m 14)) (and (pos-int? d) (< 0 d 31))]}
@@ -781,9 +783,7 @@
                  (nth days)
                  (go-forward (t/hours 1))
                  (hebrew-date lat lon))))
-     (catch IndexOutOfBoundsException _e nil)))
-  ([m d date] (find-date jerusalem-lat jerusalem-lon m d date))
-  ([m d] (find-date m d (zone-it jerusalem-tz (now)))))
+     (catch IndexOutOfBoundsException _e nil))))
 
 (defn find-date-in-year
   "Return a map containing the details of a `hebrew-date` where:
@@ -813,12 +813,12 @@
   scope of this library.
 
   See also `find-date`."
+  ([y m d] (find-date-in-year jerusalem-tz y m d))
+  ([tz y m d] (find-date-in-year jerusalem-lat jerusalem-lon tz y m d))
   ([lat lon tz y m d]
    {:pre [(string? tz) (and (pos-int? y) (<= 1584 y 2100))
           (and (pos-int? m) (< 0 m 14)) (and (pos-int? d) (< 0 d 31))]}
-   (find-date lat lon m d (make-zoned-date tz y 6 1 12)))
-  ([tz y m d] (find-date-in-year jerusalem-lat jerusalem-lon tz y m d))
-  ([y m d] (find-date-in-year jerusalem-tz y m d)))
+   (find-date lat lon m d (make-zoned-date tz y 6 1 12))))
 
 ;; The following functions were used to calculate the feast days for
 ;; `calculated-feast-days`. They're terribly slow and shouldn't be used
