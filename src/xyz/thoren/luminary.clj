@@ -117,11 +117,11 @@
       (.timezone ^SunTimes$SunTimesBuilder <> t)
       (.execute ^SunTimes$SunTimesBuilder <>))))
 
-(defn- b-
+(defn- bigdec-
   [a b]
   (float (- (bigdec a) (bigdec b))))
 
-(defn- b+
+(defn- bigdec+
   [a b]
   (float (+ (bigdec a) (bigdec b))))
 
@@ -132,12 +132,12 @@
    (<= -65.7 lat 65.7) lat
    (<= 65.7 lat 65.8) 65.7
    (>= -65.7 lat -65.8) -65.7
-   (<= 65.8 lat 67) (b- lat 0.1)
-   (>= -65.8 lat -67) (b+ lat 0.1)
-   (<= 67 lat 70) (b- lat 0.3)
-   (>= -67 lat 70) (b+ lat 0.3)
-   (<= 70 lat 75) (b- lat 0.5)
-   (>= -70 lat -75) (b+ lat 0.5)
+   (<= 65.8 lat 67) (bigdec- lat 0.1)
+   (>= -65.8 lat -67) (bigdec+ lat 0.1)
+   (<= 67 lat 70) (bigdec- lat 0.3)
+   (>= -67 lat 70) (bigdec+ lat 0.3)
+   (<= 70 lat 75) (bigdec- lat 0.5)
+   (>= -70 lat -75) (bigdec+ lat 0.5)
    (neg? lat) (inc lat)
    :else (dec lat)))
 
