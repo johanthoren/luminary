@@ -488,9 +488,8 @@
                  "21st" "22nd" "23rd" (map #(str % "th") (range 24 31))])))
 
 (def weekday-names
-  (as-> ["1st" "2nd" "3rd" "4th" "5th" "6th"] <>
-        (mapv #(str % " day of the week") <>)
-        (conj <> "Sabbath")))
+  (conj (mapv #(str % " day of the week") ["1st" "2nd" "3rd" "4th" "5th" "6th"])
+        "Sabbath"))
 
 (defn- single-day-feast [feast] (assoc feast :day-of-feast 1, :days-in-feast 1))
 
