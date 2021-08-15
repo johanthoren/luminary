@@ -203,7 +203,13 @@
                              (noon lat lon (go-forward (t/hours 16) p)))]
     [p (go-back (t/seconds 1) n)]))
 
-(defn- calculate-new-moon
+(defn calculate-new-moon
+  "Given a java.time.ZonedDateTime object `date` return an
+  org.shredzone.commons.suncalc.MoonPhase object describing the new moon
+  following `date` using the same timezone as `date`.
+
+  Example:
+  (calculate-new-moon (make-zoned-date \"Asia/Jerusalem\" 2021 6 1 12))"
   [^ZonedDateTime date]
   (let [t (str (t/zone-id date))]
     (as-> (MoonPhase/compute) <>
@@ -211,7 +217,15 @@
       (.timezone ^MoonPhase$MoonPhaseBuilder <> t)
       (.execute ^MoonPhase$MoonPhaseBuilder <>))))
 
-(defn- next-new-moon
+(defn next-new-moon
+  "Given a java.time.ZonedDateTime object `date` return a new
+  java.time.ZonedDateTime object detailing the time of the new moon following
+  `date` using the same timezone as `date`.
+
+  See also `calculate-new-moon`.
+
+  Example:
+  (next-new-moon (make-zoned-date \"Asia/Jerusalem\" 2021 6 1 12))"
   [date]
   (as-> (calculate-new-moon date) <>
         (.getTime ^MoonPhase <>)
