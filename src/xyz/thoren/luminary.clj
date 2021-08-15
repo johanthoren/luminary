@@ -557,23 +557,33 @@
     (= d 1) (rosh-chodesh m)
     :else false))
 
+(defn- days-in-first-month
+  [start-of-year]
+  (->> (go-forward (t/days 2) start-of-year)
+       (zone-it "Asia/Jerusalem")
+       (hebrew-days-in-month jerusalem-lat jerusalem-lon)))
+
+(defn- days-in-prev-month
+  [start-of-month]
+  (->> (go-back (t/days 2) start-of-month)
+       (zone-it "Asia/Jerusalem")
+       (hebrew-days-in-month jerusalem-lat jerusalem-lon)))
+
 (defn- major-feast-day?
   "Given `m` (hebrew month of year), `d` (hebrew day of month), and `dow`
   (hebrew day of week), return a map with details of any major feast day on that
   day, or return false if there are none."
   [m d dow start-of-year start-of-month]
   (let [days-in-first-month
-          (when (and (= m 3) (<= 5 d 12))
-            (->> (go-forward (t/days 2) start-of-year)
-                 (zone-it "Asia/Jerusalem")
-                 (hebrew-days-in-month jerusalem-lat jerusalem-lon)))
+        (when (and (= m 3) (<= 5 d 12))
+          (days-in-first-month start-of-year))
         days-in-prev-month
-          (when (or (and (= m 3) (<= 5 d 12)) (and (= m 10) (< 0 d 4)))
-            (->> (go-back (t/days 2) start-of-month)
-                 (zone-it "Asia/Jerusalem")
-                 (hebrew-days-in-month jerusalem-lat jerusalem-lon)))
-        two-first-months (when (and days-in-first-month days-in-prev-month)
-                           (+ days-in-first-month days-in-prev-month))]
+        (when (or (and (= m 3) (<= 5 d 12))
+                  (and (= m 10) (< 0 d 4)))
+          (days-in-prev-month start-of-month))
+        two-first-months
+        (when (and days-in-first-month days-in-prev-month)
+          (+ days-in-first-month days-in-prev-month))]
     (cond
       (and (= m 1) (= d 14)) pesach
       (and (= m 1) (<= 15 d 21) (= dow 1)) yom-bikkurim
