@@ -166,12 +166,13 @@
         sunset (.getSet sun)]
     (cond
       (or always-down always-up)
-      (cond (< lat -65.7)
-            (next-sunset (towards-polar-circle lat) lon date :adjusted true)
-            (> lat 65.7)
-            (next-sunset (towards-polar-circle lat) lon date :adjusted true)
-            :else (throw (Exception. (str "Sun either always up or always down"
-                                          " but latitude is: " lat))))
+      (cond
+        (< lat -65.7)
+        (next-sunset (towards-polar-circle lat) lon date :adjusted true)
+        (> lat 65.7)
+        (next-sunset (towards-polar-circle lat) lon date :adjusted true)
+        :else (throw (Exception. (str "Sun either always up or always down"
+                                      " but latitude is: " lat))))
       ;; This seems to happen when the sunset occurred just before `date`.
       (nil? sunset)
       (next-sunset lat lon (go-forward (t/minutes 1) date) :adjusted adjusted)
