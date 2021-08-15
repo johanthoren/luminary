@@ -244,11 +244,10 @@
   (let [zdate (zone-it jerusalem-tz date)
         lat jerusalem-lat
         lon jerusalem-lon
-        previous-moon (previous-new-moon zdate)
-        day-following-previous-moon (next-start-of-day lat lon previous-moon)
+        previous-m (previous-new-moon zdate)
+        day-following-previous-m (next-start-of-day lat lon previous-m)
         next-day (next-start-of-day lat lon zdate)]
-    (if (zero? (t/as (t/duration day-following-previous-moon next-day)
-                     :seconds))
+    (if (zero? (t/as (t/duration day-following-previous-m next-day) :seconds))
       next-day
       (next-start-of-day lat lon (next-new-moon zdate)))))
 
