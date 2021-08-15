@@ -56,6 +56,10 @@
   {:pre [(valid-zone-id? tz) (t/zoned-date-time? date)]}
   (t/with-zone-same-instant date tz))
 
+(defn truncate-to-minutes
+  [date]
+  (t/truncate-to date :minutes))
+
 (defn now
   "Return the current time using the system timezone."
   []
@@ -168,7 +172,7 @@
       ;; This seems to happen when the sunset occurred just before `date`.
       (nil? sunset)
       (next-sunset lat lon (go-forward (t/minutes 1) date) :adjusted adjusted)
-      :else {:sunset (t/truncate-to sunset :minutes)
+      :else {:sunset (truncate-to-minutes sunset)
              :adjusted-for-polar-region adjusted
              :always-down always-down
              :always-up always-up
@@ -227,9 +231,7 @@
   Example:
   (next-new-moon (make-zoned-date \"Asia/Jerusalem\" 2021 6 1 12))"
   [date]
-  (as-> (calculate-new-moon date) <>
-        (.getTime ^MoonPhase <>)
-        (t/truncate-to <> :minutes)))
+  (truncate-to-minutes (.getTime ^MoonPhase (calculate-new-moon date))))
 
 (defn- previous-new-moon
   [date]
