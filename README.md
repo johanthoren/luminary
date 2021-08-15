@@ -3,17 +3,22 @@
 A Clojure library designed to provide date calculations based on the Bible and
 the 1st Book of Enoch.
 
-> And God said, Let there be **lights** in the firmament of the heaven to divide the day from the night; and let them be for signs, and for seasons, and for days, and years:
+> And God said, Let there be **lights** in the firmament of the heaven to divide
+> the day from the night; and let them be for signs, and for seasons, and for
+> days, and years:
 >
-> And let them be for **lights** in the firmament of the heaven to give light upon the earth: and it was so.
+> And let them be for **lights** in the firmament of the heaven to give light
+> upon the earth: and it was so.
 
-[Genesis 1:14-15](https://www.biblegateway.com/passage/?search=Genesis+1:14-15&version=KJV)
+[Genesis
+1:14-15](https://www.biblegateway.com/passage/?search=Genesis+1:14-15&version=KJV)
 
 ## Usage
 
-[![Clojars Project](https://img.shields.io/clojars/v/xyz.thoren/luminary.svg)](https://clojars.org/xyz.thoren/luminary)
+[![Clojars
+Project](https://img.shields.io/clojars/v/xyz.thoren/luminary.svg)](https://clojars.org/xyz.thoren/luminary)
 
-Note that Luminary is still in active development and things are changing with 
+Note that Luminary is still in active development and things are changing with
 every release. Consider it unstable until a 1.0.0 release has been tagged.
 
 Require:
@@ -108,8 +113,8 @@ Examples:
    :end-adjusted-for-polar-region false}}}
 ```
 
-`list-of-known-feast-days-in-gregorian-year` will list the dates on which holidays start
-at the sunset:
+`list-of-known-feast-days-in-gregorian-year` will list the dates on which 
+holidays start at the sunset:
 ``` clojure
 (l/list-of-known-feast-days-in-gregorian-year 2021)
 ;; => 
@@ -154,52 +159,50 @@ at the sunset:
 
 ## Background
 
-The Bible instructs believers to keep several Feasts, or *Moedim*. There 
-are several methods for determining what date it is according to the model 
-described in the Bible. The most common would be 
-[the Rabbinic Calendar](https://en.wikipedia.org/wiki/Hebrew_calendar) which 
-is a mathematical calendar based on a lunar month and a solar year, but there 
-are others, such as 
-[the Karaite Calendar](https://en.wikipedia.org/wiki/Hebrew_calendar#Karaite_calendar),
-which is also has a lunar month and a solar year, but where observation of the
-new moon is the basis for a 'new month' and the status of the Barley in Israel
-is the basis for a 'new year'.
+The Bible instructs believers to keep several Feasts, or *Moedim*. There are
+several methods for determining what date it is according to the model described
+in the Bible. The most common would be [the Rabbinic
+Calendar](https://en.wikipedia.org/wiki/Hebrew_calendar) which is a mathematical
+calendar based on a lunar month and a solar year, but there are others, such as
+[the Karaite
+Calendar](https://en.wikipedia.org/wiki/Hebrew_calendar#Karaite_calendar), which
+is also has a lunar month and a solar year, but where observation of the new
+moon is the basis for a 'new month' and the status of the Barley in Israel is
+the basis for a 'new year'.
 
 This library is based both on The Bible and the 1st Book of Enoch and follows
 the following conventions:
 
-- A new year will start at the first sunset after the first lunar conjunction following the March Equinox.
+- A new year will start at the first sunset after the first lunar conjunction
+  following the March Equinox.
 - A new month will start at the first sunset following lunar conjunction.
 - A new day starts at the sunset.
 - The week starts on the evening of what is commonly known as Saturday.
 - The Sabbath falls on the last day of the 7 day week.
 - For locations outside of Israel, the new year and the new month will fall on
-the same Gregorian date as they did in Israel. For example, if the next month will
-start on the eve of March 3rd in Israel, the same will be true for locations where
-the sunset will come before the lunar conjunction. This is so that everyone will
-keep the feast days together which would be impossible if one would not base the
-new year and the new month on the one in Israel.
+the same Gregorian date as they did in Israel. For example, if the next month
+will start on the eve of March 3rd in Israel, the same will be true for
+locations where the sunset will come before the lunar conjunction. This is so
+that everyone will keep the feast days together which would be impossible if one
+would not base the new year and the new month on the one in Israel.
 - For locations where the sun would not rise or set on a particular date, the
-latitude is adjusted to 65.7/-65.7 for that particular day, making sure that there
-is always a sunset to start the new day. This is how I imagine keeping the day count
-if moving to such a location. For days when there is a sunset at the actual coordinates,
-that sunset will be used.
-- The location used to calculate the timing of the new year and the new month is the
-Temple Mount in Jerusalem.
+latitude is adjusted to 65.7/-65.7 for that particular day, making sure that
+there is always a sunset to start the new day. This is how I imagine keeping the
+day count if moving to such a location. For days when there is a sunset at the
+actual coordinates, that sunset will be used.
+- The location used to calculate the timing of the new year and the new month is
+the Temple Mount in Jerusalem.
 - The feast of First Fruits falls on the day following the weekly Sabbath during
 the Feast of Unleavened Bread.
 - On leap years Purim falls on Adar I following the Karaite convention.
 
 ## Contribution
 
-Pull requests are welcome. Especially those related to performance improvements,
-and of course bug fixes. Please don't open an issue or a pull request to 'fix'
-the interpretation of Scripture leading to this calendar system. There are many 
+Contributions are welcome. Especially those related to performance improvements
+and bug fixes. Please don't open an issue or a pull request to 'fix' the
+interpretation of Scripture leading to this calendar system. There are many
 calendar systems out there and I absolutely respect that no one can know with
 100% assurance how to calculate these matters until Messiah comes back.
-
-With that being said, I will consider pull requests to support multiple variants,
-such as sliver calculations, etc.
 
 ## Acknowledgements
 
@@ -211,6 +214,7 @@ such as sliver calculations, etc.
 
 Copyright &copy; 2021 Johan Thorén
 
-This project is licensed under the [GNU Lesser General Public License v3.0][license].
+This project is licensed under the 
+[GNU Lesser General Public License v3.0][license].
 
 [license]: https://choosealicense.com/licenses/lgpl-3.0
