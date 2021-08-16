@@ -218,8 +218,8 @@ calendar based on a lunar month and a solar year, but there are others, such as
 [the Karaite
 Calendar](https://en.wikipedia.org/wiki/Hebrew_calendar#Karaite_calendar), which
 is also has a lunar month and a solar year, but where observation of the new
-moon is the basis for a 'new month' and the status of the Barley in Israel is
-the basis for a 'new year'.
+moon is the basis for a *new month* and the status of the Barley in Israel is
+the basis for a *new year*.
 
 This library is based both on The Bible and the 1st Book of Enoch and follows
 the following conventions:
@@ -250,7 +250,7 @@ the Feast of Unleavened Bread.
 ## Contribution
 
 Contributions are welcome, especially those related to performance improvements
-and bug fixes. Please don't open an issue or a pull request to 'fix' the
+and bug fixes. Please don't open an issue or a pull request to *fix* the
 interpretation of Scripture leading to this calendar system. There are many
 calendar systems out there and I absolutely respect that no one can know with
 100% assurance how to calculate these matters until Messiah comes back.
