@@ -31,7 +31,7 @@ Require:
 
 See [the full API documentation](https://cljdoc.org/d/xyz.thoren/luminary).
 
-### Examples:
+### Examples
 
 `date` is the *main* function that constructs a map containing details about a
 day according to biblical timekeeping. The most simple use is without any
