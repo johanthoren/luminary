@@ -707,15 +707,14 @@
   "Return a map containing the details of a hebrew `date` where:
   `lat` is the latitude of the location,
   `lon` is the longitude of the location, and
-  `t` is a ZonedDateTime object from which the beginning of the hebrew year will
-  be calculated. I.e, it will use the 'current' year of `t` as the base for
-  calculating the `hebrew-month` and `hebrew-day-of-month`.
+  `t` is a ZonedDateTime object representing the time for which the `date` will
+  be calculated.
 
   If only `t` is provided `lat` and `lon` will default to the coordinates of
   the Temple Mount in Jerusalem.
 
-  In addition, if only `lat`, and `lon` is provided `t` will default to the
-  current time in the \"Asia/Jerusalem\" timezone.
+  In addition, if only `lat`, and `lon` are provided `t` will default to the
+  current time using the system timezone.
 
   Example:
   (date 59.3325800 18.0649000 (in-zone \"Europe/Stockholm\" (now)))
