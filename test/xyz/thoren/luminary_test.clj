@@ -17,24 +17,23 @@
 (def tm-lat 31.7781161)
 (def tm-lon 35.233804)
 
-(deftest test-calculated-feast-days
+(deftest test-feast-days
   (testing "that the saved feast days are the same as freshly calculated ones"
-    (is (= l/calculated-feast-days
+    (is (= l/feast-days
            (apply merge
-                  (map #'xyz.thoren.luminary/map-of-feast-days-in-gregorian-year
+                  (map #'xyz.thoren.luminary/map-of-feast-days-in-year
                        (range 2020 2040)))))))
 
 (defn- time-of-sunset
   [lat lon year month day]
   (#'xyz.thoren.luminary/next-start-of-day
-   lat lon (l/make-utc-date year month day 12 0)))
+   lat lon (l/utc-zdt year month day 12 0)))
 
 (deftest test-sunset-drift
   (testing "that the same minute is always reported for the sunset"
     (testing "in Sweden"
       (let [r #(str (:sunset (#'xyz.thoren.luminary/next-sunset
-                              58 12 (l/make-zoned-date
-                                     "Europe/Stockholm" 2021 %1 %2 %3 0))))
+                              58 12 (l/zdt "Europe/Stockholm" 2021 %1 %2 %3 0))))
             t #(is (= %4 (r %1 %2 %3)))]
         (testing "on June 6"
           (doseq [h (range 0 22)]
@@ -48,8 +47,7 @@
     (testing "in Anchorage"
       (let [r #(str (:sunset (#'xyz.thoren.luminary/next-sunset
                               anchorage-latitude anchorage-longitude
-                              (l/make-zoned-date
-                               "America/Anchorage" 2021 %1 %2 %3 0))))
+                              (l/zdt "America/Anchorage" 2021 %1 %2 %3 0))))
             t #(is (= %4 (r %1 %2 %3)))]
         (testing "on May 10"
           (doseq [h (range 0 23)]
@@ -64,8 +62,7 @@
     (testing "in Puerto-Williams"
       (let [r #(str (:sunset (#'xyz.thoren.luminary/next-sunset
                               puerto-williams-latitude puerto-williams-longitude
-                              (l/make-zoned-date
-                               "Antarctica/Palmer" 2021 %1 %2 %3 0))))
+                              (l/zdt "Antarctica/Palmer" 2021 %1 %2 %3 0))))
             t #(is (= %4 (r %1 %2 %3)))]
         (testing "on May 10"
           (doseq [h (range 0 18)]
@@ -151,7 +148,7 @@
 (deftest new-moons
   (testing "time of new moons 2021"
     (let [t #(is (= %2 (str (#'xyz.thoren.luminary/next-new-moon
-                             (l/make-utc-date 2021 %1 1)))))]
+                             (l/utc-zdt 2021 %1 1)))))]
       (t 1 "2021-01-13T05:00Z[UTC]")
       (t 2 "2021-02-11T19:07Z[UTC]")
       (t 3 "2021-03-13T10:24Z[UTC]")
@@ -169,8 +166,7 @@
   (testing "the time of the previous new year in Israel"
     (let [t #(is (= %2
                     (str (#'xyz.thoren.luminary/next-start-of-year-in-israel
-                          (l/make-zoned-date "Asia/Jerusalem"
-                                             %1 (+ 5 (rand-int 8)) 1 1)))))]
+                          (l/zdt "Asia/Jerusalem" %1 (+ 5 (rand-int 8)) 1 1)))))]
       (t 2018 "2019-04-05T19:01+03:00[Asia/Jerusalem]")
       (t 2019 "2020-03-24T17:53+02:00[Asia/Jerusalem]")
       (t 2020 "2021-04-12T19:06+03:00[Asia/Jerusalem]")
@@ -186,8 +182,7 @@
   (testing "the time of the previous new year in Israel"
     (let [t #(is (= %2
                     (str (#'xyz.thoren.luminary/previous-start-of-year-in-israel
-                          (l/make-zoned-date "Asia/Jerusalem"
-                                             %1 (+ 5 (rand-int 8)) 22 12)))))]
+                          (l/zdt "Asia/Jerusalem" %1 (+ 5 (rand-int 8)) 22 12)))))]
       (t 2019 "2019-04-05T19:01+03:00[Asia/Jerusalem]")
       (t 2020 "2020-03-24T17:53+02:00[Asia/Jerusalem]")
       (t 2021 "2021-04-12T19:06+03:00[Asia/Jerusalem]")
@@ -205,8 +200,7 @@
           lon tm-lon
           t #(is (= %6
                     (str (#'xyz.thoren.luminary/previous-start-of-month
-                          lat lon (l/make-zoned-date "Asia/Jerusalem"
-                                                     %1 %2 %3 %4 %5)))))]
+                          lat lon (l/zdt "Asia/Jerusalem" %1 %2 %3 %4 %5)))))]
       (t 2021 7 10 1 20 "2021-06-10T19:44+03:00[Asia/Jerusalem]")
       (t 2021 7 10 19 50 "2021-07-10T19:47+03:00[Asia/Jerusalem]")
       (t 2021 12 4 6 35 "2021-11-05T16:46+02:00[Asia/Jerusalem]")
@@ -217,8 +211,7 @@
     (let [t #(is (= %6
                     (str (#'xyz.thoren.luminary/next-start-of-year
                           tm-lat tm-lon
-                          (l/make-zoned-date
-                           "Asia/Jerusalem" %1 %2 %3 %4 %5)))))]
+                          (l/zdt "Asia/Jerusalem" %1 %2 %3 %4 %5)))))]
       (t 2021 3 20 12 0 "2021-04-12T19:06+03:00[Asia/Jerusalem]"))))
 
 (deftest arvidsjaur-previous-start-of-month
@@ -227,8 +220,7 @@
           lon arvidsjaur-longitude
           t #(is (= %6
                     (str (#'xyz.thoren.luminary/previous-start-of-month
-                          lat lon (l/make-zoned-date
-                                   "Europe/Stockholm" %1 %2 %3 %4 %5)))))]
+                          lat lon (l/zdt "Europe/Stockholm" %1 %2 %3 %4 %5)))))]
       (t 2021 7 10 1 20 "2021-06-10T23:54+02:00[Europe/Stockholm]")
       (t 2021 7 10 19 50 "2021-06-10T23:54+02:00[Europe/Stockholm]")
       (t 2021 12 4 6 35 "2021-11-05T15:02+01:00[Europe/Stockholm]")
@@ -241,8 +233,7 @@
           lon puerto-williams-longitude
           t #(is (= %6
                     (str (#'xyz.thoren.luminary/previous-start-of-month
-                          lat lon (l/make-zoned-date
-                                    "Antarctica/Palmer" %1 %2 %3 %4 %5)))))]
+                          lat lon (l/zdt "Antarctica/Palmer" %1 %2 %3 %4 %5)))))]
       (t 2021 7 10 1 20 "2021-06-10T17:08-03:00[Antarctica/Palmer]")
       (t 2021 7 10 19 50 "2021-07-10T17:22-03:00[Antarctica/Palmer]")
       (t 2021 12 4 6 35 "2021-11-05T20:57-03:00[Antarctica/Palmer]")
@@ -255,8 +246,7 @@
           lon anchorage-longitude
           t #(is (= %6
                     (str (#'xyz.thoren.luminary/previous-start-of-month
-                          lat lon (l/make-zoned-date
-                                    "America/Anchorage" %1 %2 %3 %4 %5)))))]
+                          lat lon (l/zdt "America/Anchorage" %1 %2 %3 %4 %5)))))]
       (t 2021 7 10 1 20 "2021-06-10T23:34-08:00[America/Anchorage]")
       (t 2021 7 10 23 50 "2021-07-10T23:26-08:00[America/Anchorage]")
       (t 2021 12 4 6 35 "2021-11-05T17:46-08:00[America/Anchorage]")
@@ -267,7 +257,7 @@
   (testing "the properties of the list of days of a given month"
     (let [t #(#'xyz.thoren.luminary/start-of-days-in-month
               tm-lat tm-lon
-              (apply l/make-utc-date %&))]
+              (apply l/utc-zdt %&))]
       (doseq [y (range 2021 2023)
               m (range 1 13)]
         (let [r (t y m 1 12 0)]
@@ -277,22 +267,22 @@
       (is (some #(= "2021-10-24T14:57Z[UTC]" %)
                 (map str (#'xyz.thoren.luminary/start-of-days-in-month
                           tm-lat tm-lon
-                          (l/make-utc-date 2021 10 27 23)))))
+                          (l/utc-zdt 2021 10 27 23)))))
       (is (some #(= "2021-11-03T14:48Z[UTC]" %)
                 (map str (#'xyz.thoren.luminary/start-of-days-in-month
                           tm-lat tm-lon
-                          (l/make-utc-date 2021 10 27 23))))))))
+                          (l/utc-zdt 2021 10 27 23))))))))
 
 (deftest next-start-of-week-at-temple-mount
   (testing "that the correct start of week is calculated"
     (let [r #(#'xyz.thoren.luminary/next-start-of-week
               tm-lat tm-lon
-              (apply l/make-zoned-date "Asia/Jerusalem" %&))
+              (apply l/zdt "Asia/Jerusalem" %&))
           t #(is (= %6 (str (r %1 %2 %3 %4 %5))))]
       (t 2021 4 5 16 4 "2021-04-10T19:04+03:00[Asia/Jerusalem]"))))
 
 (deftest compare-next-start-of
-  (let [date (l/make-zoned-date "Asia/Jerusalem" 2021 7 10 19 50)]
+  (let [date (l/zdt "Asia/Jerusalem" 2021 7 10 19 50)]
     (testing "that the next start of year is the same regardless of function"
       (is (= (#'xyz.thoren.luminary/next-start-of-year-in-israel date)
              (#'xyz.thoren.luminary/next-start-of-year tm-lat tm-lon date))))
@@ -301,7 +291,7 @@
              (#'xyz.thoren.luminary/next-start-of-month tm-lat tm-lon date))))))
 
 (deftest compare-previous-start-of
-  (let [date (l/make-zoned-date "Asia/Jerusalem" 2021 7 10 19 50)]
+  (let [date (l/zdt "Asia/Jerusalem" 2021 7 10 19 50)]
     (testing "that the previous start of year is the same regardless of function"
       (is (= (#'xyz.thoren.luminary/previous-start-of-year-in-israel date)
              (#'xyz.thoren.luminary/previous-start-of-year tm-lat tm-lon date))))
@@ -312,13 +302,11 @@
 (deftest months-of-year-2020
   (testing "that the correct amount of months are calculated for 2020"
     (is (= 13 (count (#'xyz.thoren.luminary/start-of-months-in-year
-                      tm-lat tm-lon (l/make-zoned-date
-                                     "Asia/Jerusalem" 2020 5 1 1)))))))
+                      tm-lat tm-lon (l/zdt "Asia/Jerusalem" 2020 5 1 1)))))))
 
 (deftest find-the-correct-date
   (testing "that the correct start of day is returned"
-    (let [r #(l/find-date %1 %2 (l/make-zoned-date
-                                 "Asia/Jerusalem" %3 %4 %5 %6))
+    (let [r #(l/lookup-date %1 %2 (l/zdt "Asia/Jerusalem" %3 %4 %5 %6))
           t #(let [h (r %1 %2 %3 %4 %5 %6)]
                (is (= %7 (str (get-in h [:time :day :start]))))
                (is (= %1 (get-in h [:hebrew :month-of-year])))
@@ -332,7 +320,7 @@
 
 (deftest find-the-correct-date-in-year-2021
   (testing "that the correct start of day is returned"
-    (let [r #(l/find-date-in-year %1 %2 %3)
+    (let [r #(l/lookup-date-in-year %1 %2 %3)
           t #(let [h (r %1 %2 %3)]
                (is (= %4 (str (get-in h [:time :day :start]))))
                (is (= %2 (get-in h [:hebrew :month-of-year])))
@@ -348,7 +336,7 @@
 
 (deftest find-the-correct-date-in-year-2031
   (testing "that the correct start of day is returned"
-    (let [r #(l/find-date-in-year %1 %2 %3)
+    (let [r #(l/lookup-date-in-year %1 %2 %3)
           t #(let [h (r %1 %2 %3)]
                (is (= %4 (str (get-in h [:time :day :start]))))
                (is (= %2 (get-in h [:hebrew :month-of-year])))
@@ -364,7 +352,7 @@
 
 (deftest try-finding-a-bad-date-in-year
   (testing "that nothing is returned"
-    (let [r #(l/find-date-in-year %1 %2 %3)
+    (let [r #(l/lookup-date-in-year %1 %2 %3)
           t #(let [h (r %1 %2 %3)]
                (is (= %4 (str (get-in h [:time :day :start]))))
                (is (nil? (get-in h [:hebrew :month-of-year])))
@@ -374,13 +362,11 @@
       (testing "for the 30th (non-existing) day of the 12th month"
         (t 2021 12 30 "")))))
 
-(deftest hebrew-dates-in-puerto-williams
+(deftest dates-in-puerto-williams
   (testing "that some select days are correctly calculated and reported"
     (let [lat puerto-williams-latitude
           lon puerto-williams-longitude
-          r #(l/hebrew-date lat lon
-                              (apply l/make-zoned-date
-                                     "Antarctica/Palmer" %&))]
+          r #(l/date lat lon (apply l/zdt "Antarctica/Palmer" %&))]
       (let [h (r 2021 4 12 12 0)]
         (is (= 13 (get-in h [:hebrew :month-of-year])))
         (is (= 30 (get-in h [:hebrew :day-of-month])))
@@ -485,12 +471,11 @@
         (is (= "Feast of Weeks" (get-in h [:hebrew :major-feast-day :name])))
         (is (= "Sivan" (get-in h [:hebrew :names :traditional-month-of-year])))))))
 
-(deftest hebrew-dates-in-arvidsjaur
+(deftest dates-in-arvidsjaur
   (testing "that some select days are correctly calculated and reported"
     (let [r (fn [& args]
-              (l/hebrew-date arvidsjaur-latitude arvidsjaur-longitude
-                               (apply l/make-zoned-date
-                                      (flatten ["Europe/Stockholm" args]))))]
+              (l/date arvidsjaur-latitude arvidsjaur-longitude
+                     (apply l/zdt (flatten ["Europe/Stockholm" args]))))]
       (let [h (r 2021 4 12 23 0)]
         (is (= 1 (get-in h [:hebrew :month-of-year])))
         (is (= 1 (get-in h [:hebrew :day-of-month])))
@@ -595,12 +580,11 @@
         (is (= "Feast of Weeks" (get-in h [:hebrew :major-feast-day :name])))
         (is (= "Sivan" (get-in h [:hebrew :names :traditional-month-of-year])))))))
 
-(deftest hebrew-dates-at-temple-mount
+(deftest dates-at-temple-mount
   (testing "that some select days are correctly calculated and reported"
     (let [r (fn [& args]
-              (l/hebrew-date tm-lat tm-lon
-                               (apply l/make-zoned-date
-                                      (flatten ["Asia/Jerusalem" args]))))]
+              (l/date tm-lat tm-lon
+                      (apply l/zdt (flatten ["Asia/Jerusalem" args]))))]
       (let [h (r 2021 4 12 12 0)]
         (is (= 13 (get-in h [:hebrew :month-of-year])))
         (is (= 30 (get-in h [:hebrew :day-of-month])))
@@ -721,12 +705,11 @@
         (is (= 7 (get-in h [:hebrew :major-feast-day :day-of-feast])))
         (is (= "Tevet" (get-in h [:hebrew :names :traditional-month-of-year])))))))
 
-(deftest hebrew-dates-at-longyearbyen
+(deftest dates-at-longyearbyen
   (testing "that some select days are correctly calculated and reported"
     (let [r (fn [& args]
-              (l/hebrew-date longyearbyen-latitude longyearbyen-longitude
-                               (apply l/make-zoned-date
-                                      (flatten ["Europe/Oslo" args]))))]
+              (l/date longyearbyen-latitude longyearbyen-longitude
+                      (apply l/zdt (flatten ["Europe/Oslo" args]))))]
       (let [h (r 2021 4 12 12 0)]
         (is (= 13 (get-in h [:hebrew :month-of-year])))
         (is (= 30 (get-in h [:hebrew :day-of-month])))
@@ -771,10 +754,10 @@
         (is (= 7 (get-in h [:hebrew :major-feast-day :day-of-feast])))
         (is (= "Tevet" (get-in h [:hebrew :names :traditional-month-of-year])))))))
 
-(deftest test-known-feast-days
-  (let [r #(l/list-of-known-feast-days-in-gregorian-year %)
+(deftest test-list-of-feast-days
+  (let [r #(l/list-of-feast-days-in-year %)
         t #(is (= %2 (r %1)))]
-    (testing "testing the known feast days"
+    (testing "testing the feast days"
       (testing "in 2021"
         (t 2021 '("2021-01-13 1st day of the 11th month"
                   "2021-02-12 1st day of the 12th month"

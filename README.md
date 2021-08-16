@@ -27,10 +27,61 @@ Require:
 (:require [xyz.thoren.luminary :as l])
 ```
 
-Examples:
+### Documentation
 
+See [the full API documentation](https://cljdoc.org/d/xyz.thoren/luminary).
+
+### Examples:
+
+`date` is the *main* function that constructs a map containing details about a
+day according to biblical timekeeping. The most simple use is without any
+arguments, which will give you the current biblical day in Jerusalem, Israel.
+However, you can provide a range of arguments to fully customize when and where
+to calculate the day.
 ``` clojure
-(l/find-date 5 11)
+(l/date)
+;; => 
+{:hebrew
+ {:days-in-month 30,
+  :day-of-week 3,
+  :month-of-year 5,
+  :minor-feast-day false,
+  :day-of-month 9,
+  :major-feast-day false,
+  :sabbath false,
+  :names
+  {:month-of-year "5th",
+   :traditional-month-of-year "Av",
+   :day-of-month "9th",
+   :day-of-week "3rd day of the week"},
+  :months-in-year 12},
+ :time
+ {:year
+  {:start #time/zoned-date-time "2021-04-12T19:06+03:00[Asia/Jerusalem]",
+   :end #time/zoned-date-time "2022-04-01T18:57:59+03:00[Asia/Jerusalem]",
+   :start-adjusted-for-polar-region false,
+   :end-adjusted-for-polar-region false},
+  :month
+  {:start #time/zoned-date-time "2021-08-08T19:29+03:00[Asia/Jerusalem]",
+   :end #time/zoned-date-time "2021-09-07T18:54:59+03:00[Asia/Jerusalem]",
+   :start-adjusted-for-polar-region false,
+   :end-adjusted-for-polar-region false},
+  :week
+  {:start #time/zoned-date-time "2021-08-14T19:23+03:00[Asia/Jerusalem]",
+   :end #time/zoned-date-time "2021-08-21T19:15:59+03:00[Asia/Jerusalem]",
+   :start-adjusted-for-polar-region false,
+   :end-adjusted-for-polar-region false},
+  :day
+  {:start #time/zoned-date-time "2021-08-16T19:21+03:00[Asia/Jerusalem]",
+   :end #time/zoned-date-time "2021-08-17T19:19:59+03:00[Asia/Jerusalem]",
+   :start-adjusted-for-polar-region false,
+   :end-adjusted-for-polar-region false}}}
+```
+
+`lookup-date` allows you to do a reverse lookup of a date in the biblical year.
+It too can be provided with a range of arguments which it passes on to `date`.
+``` clojure
+(l/lookup-date 5 11)
 ;; => 
 {:hebrew
  {:days-in-month 30,
@@ -48,29 +99,32 @@ Examples:
   :months-in-year 12},
  :time
  {:year
-  {:start #object[java.time.ZonedDateTime 0x7d7f4754 "2021-04-12T19:06+03:00[Asia/Jerusalem]"],
-   :end #object[java.time.ZonedDateTime 0x50fa2316 "2022-04-01T18:57:59+03:00[Asia/Jerusalem]"],
+  {:start #time/zoned-date-time "2021-04-12T19:06+03:00[Asia/Jerusalem]",
+   :end #time/zoned-date-time "2022-04-01T18:57:59+03:00[Asia/Jerusalem]",
    :start-adjusted-for-polar-region false,
    :end-adjusted-for-polar-region false},
   :month
-  {:start #object[java.time.ZonedDateTime 0x757fa215 "2021-08-08T19:29+03:00[Asia/Jerusalem]"],
-   :end #object[java.time.ZonedDateTime 0x6feb8d9e "2021-09-07T18:54:59+03:00[Asia/Jerusalem]"],
+  {:start #time/zoned-date-time "2021-08-08T19:29+03:00[Asia/Jerusalem]",
+   :end #time/zoned-date-time "2021-09-07T18:54:59+03:00[Asia/Jerusalem]",
    :start-adjusted-for-polar-region false,
    :end-adjusted-for-polar-region false},
   :week
-  {:start #object[java.time.ZonedDateTime 0x123392bd "2021-08-14T19:23+03:00[Asia/Jerusalem]"],
-   :end #object[java.time.ZonedDateTime 0x4228d927 "2021-08-21T19:15:59+03:00[Asia/Jerusalem]"],
+  {:start #time/zoned-date-time "2021-08-14T19:23+03:00[Asia/Jerusalem]",
+   :end #time/zoned-date-time "2021-08-21T19:15:59+03:00[Asia/Jerusalem]",
    :start-adjusted-for-polar-region false,
    :end-adjusted-for-polar-region false},
   :day
-  {:start #object[java.time.ZonedDateTime 0x7c635c18 "2021-08-18T19:19+03:00[Asia/Jerusalem]"],
-   :end #object[java.time.ZonedDateTime 0x439d3674 "2021-08-19T19:17:59+03:00[Asia/Jerusalem]"],
+  {:start #time/zoned-date-time "2021-08-18T19:19+03:00[Asia/Jerusalem]",
+   :end #time/zoned-date-time "2021-08-19T19:17:59+03:00[Asia/Jerusalem]",
    :start-adjusted-for-polar-region false,
    :end-adjusted-for-polar-region false}}}
 ```
 
+`lookup-date-in-year` is similar to `lookup-date` but allows you to provide a
+gregorian year, in which the hebrew year would have started that you are trying
+to find a `date` in.
 ``` clojure
-(l/find-date-in-year 78.2253587 15.4878901 "Europe/Oslo" 2025 1 14)
+(l/lookup-date-in-year 78.2253587 15.4878901 "Europe/Oslo" 2025 1 14)
 ;; => 
 {:hebrew
  {:days-in-month 30,
@@ -79,10 +133,7 @@ Examples:
   :minor-feast-day false,
   :day-of-month 14,
   :major-feast-day
-  {:name "Passover", 
-   :hebrew-name "Pesach", 
-   :day-of-feast 1, 
-   :days-in-feast 1},
+  {:name "Passover", :hebrew-name "Pesach", :day-of-feast 1, :days-in-feast 1},
   :sabbath true,
   :names
   {:month-of-year "1st",
@@ -92,31 +143,31 @@ Examples:
   :months-in-year 13},
  :time
  {:year
-  {:start #object[java.time.ZonedDateTime 0x7b50d0cc "2025-03-29T19:32+01:00[Europe/Oslo]"],
-   :end #object[java.time.ZonedDateTime 0x183fe2dc "2026-04-18T00:13:59+02:00[Europe/Oslo]"],
+  {:start #time/zoned-date-time "2025-03-29T19:32+01:00[Europe/Oslo]",
+   :end #time/zoned-date-time "2026-04-18T00:13:59+02:00[Europe/Oslo]",
    :start-adjusted-for-polar-region false,
    :end-adjusted-for-polar-region false},
   :month
-  {:start #object[java.time.ZonedDateTime 0x60f92419 "2025-03-29T19:32+01:00[Europe/Oslo]"],
-   :end #object[java.time.ZonedDateTime 0x48bd469b "2025-04-28T21:23:59+02:00[Europe/Oslo]"],
+  {:start #time/zoned-date-time "2025-03-29T19:32+01:00[Europe/Oslo]",
+   :end #time/zoned-date-time "2025-04-28T23:56:59+02:00[Europe/Oslo]",
    :start-adjusted-for-polar-region false,
    :end-adjusted-for-polar-region true},
   :week
-  {:start #object[java.time.ZonedDateTime 0x6fc06188 "2025-04-05T21:31+02:00[Europe/Oslo]"],
-   :end #object[java.time.ZonedDateTime 0x337e83c0 "2025-04-12T22:43:59+02:00[Europe/Oslo]"],
+  {:start #time/zoned-date-time "2025-04-05T21:31+02:00[Europe/Oslo]",
+   :end #time/zoned-date-time "2025-04-12T22:43:59+02:00[Europe/Oslo]",
    :start-adjusted-for-polar-region false,
    :end-adjusted-for-polar-region false},
   :day
-  {:start #object[java.time.ZonedDateTime 0x40883d00 "2025-04-11T22:32+02:00[Europe/Oslo]"],
-   :end #object[java.time.ZonedDateTime 0x9b8598d "2025-04-12T22:43:59+02:00[Europe/Oslo]"],
+  {:start #time/zoned-date-time "2025-04-11T22:32+02:00[Europe/Oslo]",
+   :end #time/zoned-date-time "2025-04-12T22:43:59+02:00[Europe/Oslo]",
    :start-adjusted-for-polar-region false,
    :end-adjusted-for-polar-region false}}}
 ```
 
-`list-of-known-feast-days-in-gregorian-year` will list the dates on which 
+`list-of-feast-days-in-year` will list the dates on which 
 holidays start at the sunset:
 ``` clojure
-(l/list-of-known-feast-days-in-gregorian-year 2021)
+(l/list-of-feast-days-in-year 2021)
 ;; => 
 ("2021-01-13 1st day of the 11th month"
  "2021-02-12 1st day of the 12th month"
