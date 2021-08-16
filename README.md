@@ -249,7 +249,7 @@ the Feast of Unleavened Bread.
 
 ## Contribution
 
-Contributions are welcome. Especially those related to performance improvements
+Contributions are welcome, especially those related to performance improvements
 and bug fixes. Please don't open an issue or a pull request to 'fix' the
 interpretation of Scripture leading to this calendar system. There are many
 calendar systems out there and I absolutely respect that no one can know with
