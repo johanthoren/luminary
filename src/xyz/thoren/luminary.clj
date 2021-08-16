@@ -1,10 +1,14 @@
 (ns xyz.thoren.luminary
-  (:require [java-time :as t]
-            [xyz.thoren.equinox :refer [march-equinox]]
-            [xyz.thoren.luminary-feast-data :as fd])
-  (:import (org.shredzone.commons.suncalc SunTimes SunTimes$SunTimesBuilder
-                                          MoonPhase MoonPhase$MoonPhaseBuilder)
-           (java.time ZonedDateTime)))
+  (:require
+   [tick.core :as t]
+   [xyz.thoren.equinox :refer [march-equinox]]
+   [xyz.thoren.luminary-feast-data :as fd])
+  (:import
+   (org.shredzone.commons.suncalc SunTimes
+                                  SunTimes$SunTimesBuilder
+                                  MoonPhase
+                                  MoonPhase$MoonPhaseBuilder)
+   (java.time ZonedDateTime)))
 
 (def jerusalem-lat
   "The Latitude of the Temple Mount in Jerusalem, Israel."
@@ -41,24 +45,25 @@
                 fd/feasts-2038
                 fd/feasts-2039]))
 
-(defn valid-zone-id?
+(defn valid-zone?
   "Given a string `s`, test if it can be transformed into a valid
   java.time.ZoneRegion. Passing a java-time.ZoneRegion object will also return
   true."
   [s]
-  (t/zone-id? (try (t/zone-id s) (catch Exception _e nil))))
+  (t/zone? (try (t/zone s) (catch Exception _e nil))))
 
 (defn zone-it
   "Given a valid timezone `tz` (either a string or a java.time.ZoneRegion
   object), and a java.time.ZonedDateTime object `date`, convert `date` to the
   same instant in `tz`."
   [tz date]
-  {:pre [(valid-zone-id? tz) (t/zoned-date-time? date)]}
-  (t/with-zone-same-instant date tz))
+  {:pre [(valid-zone? tz) (t/zoned-date-time? date)]}
+  (t/in date tz))
 
 (defn truncate-to-minutes
   [date]
-  (t/truncate-to date :minutes))
+  (let [tz (t/zone date)]
+    (zone-it tz (t/zoned-date-time (t/truncate (t/instant date) :minutes)))))
 
 (defn now
   "Return the current time using the system timezone."
@@ -70,10 +75,14 @@
   integers, return a ZonedDateTime object. Accepts between 3 and 7 integer
   arguments representing year, month, day, hour, minute, second, nanos."
   [tz & more]
-  {:pre [(valid-zone-id? tz)
+  {:pre [(valid-zone? tz)
          (empty? (remove int? more))
          (<= 3 (count more) 7)]}
-  (t/with-zone (apply t/zoned-date-time more) tz))
+  (let [d-args (take 3 more)
+        t-args (drop 3 more)
+        d (apply t/new-date d-args)
+        t (apply t/new-time (if (>= (count t-args) 2) t-args [0 0]))]
+    (t/in (t/at d t) tz)))
 
 (defn make-utc-date
   "Given at least 3 integers, return a ZonedDateTime object in the UTC timezone.
@@ -83,18 +92,18 @@
   (apply make-zoned-date (cons "UTC" more)))
 
 (defn go-back
-  "Subtract `adjustment` from `date`.
+  "Subtract `n` `unit` from `date`.
 
-  Example: (go-back (t/hours 1) (now))"
-  [adjustment date]
-  (t/adjust date t/minus adjustment))
+  Example: (go-back 5 :hours (now))"
+  [n unit date]
+  (t/<< date (t/new-duration n unit)))
 
 (defn go-forward
-  "Add `adjustment` to `date`.
+  "Add `n` `unit` to `date`.
 
-  Example: (go-forward (t/hours 1) (now))"
-  [adjustment date]
-  (t/adjust date t/plus adjustment))
+  Example: (go-forward 5 :hours (now))"
+  [n unit date]
+  (t/>> date (t/new-duration n unit)))
 
 (defn time-of-march-equinox
   "Given the year `n`, return the time of the March Equinox of that year as
@@ -113,7 +122,7 @@
   Example:
   (calculate-sun-events 31 35 (make-zoned-date \"Asia/Jerusalem\" 2021 6 1 12))"
   [lat lon ^ZonedDateTime date]
-  (let [t (str (t/zone-id date))]
+  (let [t (str (t/zone date))]
     (as-> (SunTimes/compute) <>
       (.on ^SunTimes$SunTimesBuilder <> date)
       (.at ^SunTimes$SunTimesBuilder <> lat lon)
@@ -171,7 +180,7 @@
                                       " but latitude is: " lat))))
       ;; This seems to happen when the sunset occurred just before `date`.
       (nil? sunset)
-      (next-sunset lat lon (go-forward (t/minutes 1) date) :adjusted adjusted)
+      (next-sunset lat lon (go-forward 1 :minutes date) :adjusted adjusted)
       :else {:sunset (truncate-to-minutes sunset)
              :adjusted-for-polar-region adjusted
              :always-down always-down
@@ -187,16 +196,15 @@
 (defn- previous-start-of-day
   [lat lon date]
   (->> (next-start-of-day lat lon date)
-       (go-back (t/hours 25))
+       (go-back 25 :hours)
        (next-start-of-day lat lon)))
 
 (defn- noon
   [lat lon date]
-  (let [tz (t/zone-id date)
-        year (t/as date :year)
-        month (t/as date :month-of-year)
-        day (t/as date :day-of-month)
-        morning (t/with-zone (t/zoned-date-time year month day 4 0) tz)]
+  (let [year (t/int (t/year date))
+        month (t/int (t/month date))
+        day (t/day-of-month date)
+        morning (make-zoned-date (t/zone date) year month day 4 0)]
     (.getNoon ^SunTimes (calculate-sun-events lat lon morning))))
 
 (defn- boundaries-of-day
@@ -204,8 +212,8 @@
   (let [p (previous-start-of-day lat lon date)
         n (next-start-of-day lat
                              lon
-                             (noon lat lon (go-forward (t/hours 16) p)))]
-    [p (go-back (t/seconds 1) n)]))
+                             (noon lat lon (go-forward 16 :hours p)))]
+    [p (go-back 1 :seconds n)]))
 
 (defn calculate-new-moon
   "Given a java.time.ZonedDateTime object `date` return an
@@ -215,7 +223,7 @@
   Example:
   (calculate-new-moon (make-zoned-date \"Asia/Jerusalem\" 2021 6 1 12))"
   [^ZonedDateTime date]
-  (let [t (str (t/zone-id date))]
+  (let [t (str (t/zone date))]
     (as-> (MoonPhase/compute) <>
       (.on ^MoonPhase$MoonPhaseBuilder <> date)
       (.timezone ^MoonPhase$MoonPhaseBuilder <> t)
@@ -236,7 +244,7 @@
 (defn- previous-new-moon
   [date]
   (->> (next-new-moon date)
-       (go-back (t/days 31))
+       (go-back 31 :days)
        (next-new-moon)))
 
 (defn- next-start-of-month-in-israel
@@ -247,65 +255,68 @@
         previous-m (previous-new-moon zdate)
         day-following-previous-m (next-start-of-day lat lon previous-m)
         next-day (next-start-of-day lat lon zdate)]
-    (if (zero? (t/as (t/duration day-following-previous-m next-day) :seconds))
+    (if (zero? (t/seconds (t/between day-following-previous-m next-day)))
       next-day
       (next-start-of-day lat lon (next-new-moon zdate)))))
 
 (defn- previous-start-of-month-in-israel
   [date]
   (->> (next-start-of-month-in-israel date)
-       (go-back (t/days 32))
+       (go-back 32 :days)
        (next-start-of-month-in-israel)))
 
-(defn- year-month-day [date] (t/as date :year :month-of-year :day-of-month))
+(defn- year-month-day
+  [date]
+  [(t/int (t/year date))
+   (t/int (t/month date))
+   (t/day-of-month date)])
 
 (defn- next-start-of-month
   [lat lon date]
-  (let [tz (t/zone-id date)
-        prev-month-israel (previous-start-of-month-in-israel date)
+  (let [prev-month-israel (previous-start-of-month-in-israel date)
         next-month-israel (next-start-of-month-in-israel date)
         next-day (next-start-of-day lat lon date)]
     (if (= (year-month-day prev-month-israel) (year-month-day next-day))
       next-day
       (as-> (year-month-day next-month-israel) <>
-        (make-zoned-date tz (first <>) (second <>) (last <>))
+        (make-zoned-date (t/zone date) (first <>) (second <>) (last <>))
         (noon lat lon <>)
         (next-start-of-day lat lon <>)))))
 
 (defn- previous-start-of-month
   [lat lon date]
   (->> (next-start-of-month lat lon date)
-       (go-back (t/days 32))
+       (go-back 32 :days)
        (next-start-of-month lat lon)))
 
 (defn- boundaries-of-month
   [lat lon date]
   (let [p (previous-start-of-month lat lon date)
-        n (next-start-of-month lat lon (go-forward (t/days 2) p))]
-    [p (go-back (t/seconds 1) n)]))
+        n (next-start-of-month lat lon (go-forward 2 :days p))]
+    [p (go-back 1 :seconds n)]))
 
 (defn- next-march-equinox
   [date]
-  (let [tz (t/zone-id date)
-        year (Integer/parseInt (str (t/year date)))
+  (let [tz (t/zone date)
+        year (t/int (t/year date))
         same-year-march-equinox (time-of-march-equinox year)]
-    (if (t/before? date same-year-march-equinox)
+    (if (t/< date same-year-march-equinox)
       (zone-it tz same-year-march-equinox)
       (zone-it tz (time-of-march-equinox (inc year))))))
 
 (defn- previous-march-equinox
   [date]
-  (let [tz (t/zone-id date)
-        year (Integer/parseInt (str (t/year date)))
+  (let [tz (t/zone date)
+        year (t/int (t/year date))
         same-year-march-equinox (time-of-march-equinox year)]
-    (if (t/before? same-year-march-equinox date)
+    (if (t/< same-year-march-equinox date)
       (zone-it tz same-year-march-equinox)
       (zone-it tz (time-of-march-equinox (dec year))))))
 
 (defn- next-start-of-year-in-israel
   [date]
   (let [zdate (zone-it jerusalem-tz date)
-        this-year-march-equinox (time-of-march-equinox (t/as zdate :year))
+        this-year-march-equinox (time-of-march-equinox (t/int (t/year zdate)))
         previous-month (previous-start-of-month-in-israel zdate)
         pme (previous-march-equinox zdate)
         moon-following-previous-equinox (next-new-moon pme)
@@ -315,92 +326,99 @@
         next-day (next-start-of-day jerusalem-lat jerusalem-lon zdate)
         potential-new-year (next-start-of-month-in-israel (next-march-equinox
                                                             zdate))]
-    (cond (zero? (t/as (t/duration day-following-moon next-day) :seconds))
+    (cond (zero? (t/seconds (t/between day-following-moon next-day)))
           next-day
-          (t/before? previous-month this-year-march-equinox zdate)
+          (t/< previous-month this-year-march-equinox zdate)
           (next-start-of-month-in-israel zdate)
           :else potential-new-year)))
 
 (defn- previous-start-of-year-in-israel
   [date]
-  (let [y (t/as date :year)
-        m (t/as date :month-of-year)]
+  (let [y (t/int (t/year date))
+        m (t/int (t/month date))]
     (cond (> m 4) (next-start-of-year-in-israel
                     (make-zoned-date jerusalem-tz y 2 1))
           (< m 3) (next-start-of-year-in-israel
                     (make-zoned-date jerusalem-tz (dec y) 2 1))
           :else (->> (next-start-of-year-in-israel date)
-                     (go-back (t/days 400))
+                     (go-back 400 :days)
                      (next-start-of-year-in-israel)))))
 
 (defn- next-start-of-year
   [lat lon date]
-  (let [tz (t/zone-id date)
-        prev-year-israel (previous-start-of-year-in-israel date)
+  (let [prev-year-israel (previous-start-of-year-in-israel date)
         next-year-israel (next-start-of-year-in-israel date)
         next-day (next-start-of-day lat lon date)]
     (if (= (year-month-day prev-year-israel) (year-month-day next-day))
       next-day
       (as-> (year-month-day next-year-israel) <>
-        (make-zoned-date tz (first <>) (second <>) (last <>))
+        (make-zoned-date (t/zone date) (first <>) (second <>) (last <>))
         (noon lat lon <>)
         (next-start-of-day lat lon <>)))))
 
 (defn- previous-start-of-year
   [lat lon date]
-  (let [y (t/as date :year)
-        m (t/as date :month-of-year)
-        tz (t/zone-id date)]
+  (let [y (t/int (t/year date))
+        m (t/int (t/month date))
+        tz (t/zone date)]
     (cond (> m 4) (next-start-of-year lat lon (make-zoned-date tz y 2 1))
           (< m 3) (next-start-of-year lat lon (make-zoned-date tz (dec y) 2 1))
           :else (->> (next-start-of-year lat lon date)
-                     (go-back (t/days 400))
+                     (go-back 400 :days)
                      (next-start-of-year lat lon)))))
 
 (defn- boundaries-of-year
   [lat lon date]
   (let [p (previous-start-of-year lat lon date)
-        n (next-start-of-year lat lon (go-forward (t/days 1) p))]
-    [p (go-back (t/seconds 1) n)]))
+        n (next-start-of-year lat lon (go-forward 1 :days p))]
+    [p (go-back 1 :seconds n)]))
+
+(defn- saturday?
+  [date]
+  (= 6 (t/int (t/day-of-week date))))
+
+(defn- sunday?
+  [date]
+  (= 7 (t/int (t/day-of-week date))))
 
 (defn- next-start-of-week
   [lat lon date]
   (->> (range 0 8)
        (map #(->> (next-start-of-day lat lon date)
-                  (go-forward (t/days %))
-                  (go-back (t/hours 8))
+                  (go-forward % :days)
+                  (go-back 8 :hours)
                   (noon lat lon)
-                  (go-back (t/hours 6))
+                  (go-back 6 :hours)
                   (next-start-of-day lat lon)))
        (dedupe)
        ;; Since the day sometimes starts after local midnight, due to DST
-       (filter #(or (and (t/saturday? %) (>= (t/as % :hour-of-day) 2))
-                    (and (t/sunday? %) (< (t/as % :hour-of-day) 2))))
+       (filter #(or (and (saturday? %) (>= (t/hour %) 2))
+                    (and (sunday? %) (< (t/hour %) 2))))
        (first)))
 
 (defn- previous-start-of-week
   [lat lon date]
   (->> (next-start-of-week lat lon date)
-       (go-back (t/days 10))
+       (go-back 10 :days)
        (next-start-of-week lat lon)))
 
 (defn- boundaries-of-week
   [lat lon date]
   (let [p (previous-start-of-week lat lon date)
-        n (next-start-of-week lat lon (go-forward (t/days 1) p))]
-    [p (go-back (t/seconds 1) n)]))
+        n (next-start-of-week lat lon (go-forward 1 :days p))]
+    [p (go-back 1 :seconds n)]))
 
 (defn- start-of-days-in-week
   [lat lon date]
   (let [w (boundaries-of-week lat lon date)]
     (->> (range 1 8)
          (map #(->> (first w)
-                    (go-forward (t/days %))
-                    (go-back (t/hours 8))
+                    (go-forward % :days)
+                    (go-back 8 :hours)
                     (noon lat lon)
                     (next-start-of-day lat lon)))
          (dedupe)
-         (filter #(t/before? % (second w)))
+         (filter #(t/< % (second w)))
          (cons (first w)))))
 
 (defn- new-moons-since-start-of-year
@@ -409,15 +427,15 @@
         start-of-year (first y)
         end-of-year (second y)]
     (->> (range 0 14)
-         (map #(next-new-moon (go-forward (t/days (* % 29)) start-of-year)))
+         (map #(next-new-moon (go-forward (* % 29) :days start-of-year)))
          (dedupe)
-         (filter #(t/before? % end-of-year))
+         (filter #(t/< % end-of-year))
          (drop-last))))
 
 (defn- start-of-months-in-year
   [lat lon date]
   (->> (new-moons-since-start-of-year lat lon date)
-       (map #(next-start-of-month lat lon (go-back (t/hours 1) %)))
+       (map #(next-start-of-month lat lon (go-back 1 :hours %)))
        (cons (previous-start-of-year lat lon date))))
 
 (defn- hebrew-months-in-year
@@ -431,13 +449,13 @@
         end-of-month (second m)]
     (->> (range 1 32)
          (map #(->> start-of-month
-                    (go-forward (t/days %))
-                    (go-back (t/hours 2))
+                    (go-forward % :days)
+                    (go-back 2 :hours)
                     (noon lat lon)
-                    (go-back (t/hours 6))
+                    (go-back 2 :hours)
                     (next-start-of-day lat lon)))
          (dedupe)
-         (filter #(t/before? % end-of-month))
+         (filter #(t/< % end-of-month))
          (cons start-of-month))))
 
 (defn- hebrew-days-in-month
@@ -446,9 +464,9 @@
 
 (defn- hebrew-month-of-year
   [lat lon date]
-  (let [p (t/as (previous-start-of-month lat lon date) :julian-day)]
+  (let [p (t/date (previous-start-of-month lat lon date))]
     (->> (start-of-months-in-year lat lon date)
-         (map #(t/as % :julian-day))
+         (map t/date)
          (apply sorted-set)
          (keep-indexed #(when (= %2 p) %1))
          (first)
@@ -456,23 +474,21 @@
 
 (defn- hebrew-day-of-month
   [lat lon date]
-  (let [p (previous-start-of-day lat lon date)
-        pj (t/as p :julian-day)
+  (let [p (t/date (previous-start-of-day lat lon date))
         m (start-of-days-in-month lat lon date)]
-    (->> (map #(t/as % :julian-day) m)
+    (->> (map #(t/date %) m)
          (apply sorted-set)
-         (keep-indexed #(when (= %2 pj) %1))
+         (keep-indexed #(when (= %2 p) %1))
          (first)
          (inc))))
 
 (defn- hebrew-day-of-week
   [lat lon date]
-  (let [p (previous-start-of-day lat lon date)
-        pj (t/as p :julian-day)]
+  (let [p (t/date (previous-start-of-day lat lon date))]
     (->> (start-of-days-in-week lat lon date)
-         (map #(t/as % :julian-day))
+         (map #(t/date %))
          (apply sorted-set)
-         (keep-indexed #(when (= %2 pj) %1))
+         (keep-indexed #(when (= %2 p) %1))
          (first)
          (inc))))
 
@@ -560,13 +576,13 @@
 
 (defn- days-in-first-month
   [start-of-year]
-  (->> (go-forward (t/days 2) start-of-year)
+  (->> (go-forward 2 :days start-of-year)
        (zone-it "Asia/Jerusalem")
        (hebrew-days-in-month jerusalem-lat jerusalem-lon)))
 
 (defn- days-in-prev-month
   [start-of-month]
-  (->> (go-back (t/days 2) start-of-month)
+  (->> (go-back 2 :days start-of-month)
        (zone-it "Asia/Jerusalem")
        (hebrew-days-in-month jerusalem-lat jerusalem-lon)))
 
@@ -671,7 +687,7 @@
   [lat lon date]
   (if (<= -65 lat 65)
     false
-    (->> (go-back (t/hours 2) date)
+    (->> (go-back 2 :hours date)
          (next-sunset lat lon)
          (:adjusted-for-polar-region))))
 
@@ -727,7 +743,7 @@
    {:pre [(and (number? lat) (<= -90 lat 90))
           (and (number? lon) (<= -180 lon 180))
           (t/zoned-date-time? date)
-          (<= 1584 (t/as date :year) 2100)]}
+          (<= 1584 (t/int (t/year date)) 2100)]}
    (let [y (boundaries-of-year lat lon date)
          m (boundaries-of-month lat lon date)
          w (boundaries-of-week lat lon date)
@@ -776,12 +792,12 @@
            start-of-month (nth months (dec m))
            days (when start-of-month
                   (->> start-of-month
-                       (go-forward (t/hours 1))
+                       (go-forward 1 :hours)
                        (start-of-days-in-month lat lon)))]
           (when days
             (->> (dec d)
                  (nth days)
-                 (go-forward (t/hours 1))
+                 (go-forward 1 :hours)
                  (hebrew-date lat lon))))
      (catch IndexOutOfBoundsException _e nil))))
 
@@ -844,12 +860,12 @@
          (find-date-in-year y (first p) (last p)))
        (filter #(or (get-in % [:hebrew :minor-feast-day])
                     (get-in % [:hebrew :major-feast-day])))
-       (pmap #(vector (t/as (get-in % [:time :day :start])
-                            :year
-                            :month-of-year
-                            :day-of-month)
-                      (get-in % [:hebrew :minor-feast-day])
-                      (get-in % [:hebrew :major-feast-day])))
+       (pmap #(let [s (get-in % [:time :day :start])]
+                (vector [(t/int (t/year s))
+                         (t/int (t/month s))
+                         (t/day-of-month s)]
+                        (get-in % [:hebrew :minor-feast-day])
+                        (get-in % [:hebrew :major-feast-day]))))
        (map #(remove false? %))
        (filter #(= (ffirst %) year))
        (sort-by #(second (first %)))))

@@ -206,9 +206,11 @@ calendar systems out there and I absolutely respect that no one can know with
 
 ## Acknowledgements
 
-- Sun and Moon calculations are provided by [shred's commons-suncalc](https://github.com/shred/commons-suncalc).
-- Equinox calculations are provided by [xyz.thoren.equinox](https://github.com/johanthoren/equinox).
-- All time operations are utilizing [clojure.java-time](https://github.com/dm3/clojure.java-time).
+- Sun and Moon calculations are provided by [shred's
+  commons-suncalc](https://github.com/shred/commons-suncalc).
+- Equinox calculations are provided by
+  [xyz.thoren.equinox](https://github.com/johanthoren/equinox).
+- All time operations are utilizing [tick.core](https://github.com/juxt/tick).
 
 ## License
 

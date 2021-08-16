@@ -7,7 +7,7 @@
             :year 2021
             :key "lgpl-3.0"}
   :dependencies [[org.clojure/clojure "1.10.3"]
-                 [clojure.java-time "0.3.2"]
+                 [tick "0.5.0-RC1"]
                  [xyz.thoren/equinox "1.0.0"]
                  [org.shredzone.commons/commons-suncalc "3.5"]]
   :repositories [["releases" {:url "https://repo.clojars.org"
