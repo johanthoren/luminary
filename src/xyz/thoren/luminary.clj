@@ -154,7 +154,7 @@
   the latitude incremently adjusted to get closer to the equator until a sunset
   can be observed.
 
-  See also `sun-events`."
+  See also [[sun-events]]."
   [lat lon t & {:keys [adjusted] :or {adjusted false}}]
   (let [sun ^SunTimes (sun-events lat lon t)
         always-up (.isAlwaysUp sun)
@@ -224,7 +224,7 @@
   "Given a ZonedDateTime object `t` return a new ZonedDateTime object detailing
   the time of the new moon following `t` using the same timezone as `t`.
 
-  See also `new-moon`.
+  See also [[new-moon]].
 
   Example:
   (next-new-moon (zdt \"Asia/Jerusalem\" 2021 6 1 12))"
@@ -729,7 +729,7 @@
   they will be inaccurate. Calculating the timezone of a given location is out
   of scope of this library.
 
-  See also `in-zone`, `hebrew-date`, `time-date`, and `now`."
+  See also [[in-zone]], [[hebrew-date]], [[time-date]], and [[now]]."
   ([] (date (in-zone jerusalem-zone (now))))
   ([t] (date jerusalem-lat jerusalem-lon t))
   ([lat lon] (date lat lon (now)))
@@ -775,7 +775,7 @@
   they will be inaccurate. Calculating the timezone of a given location is out
   of scope of this library.
 
-  See also `date`, `in-zone`, and `now`."
+  See also [[date]], [[in-zone]], and [[now]]."
   ([m d] (lookup-date m d (in-zone jerusalem-zone (now))))
   ([m d t] (lookup-date jerusalem-lat jerusalem-lon m d t))
   ([lat lon m d t]
@@ -822,7 +822,7 @@
   will be inaccurate. Calculating the timezone of a given location is out of
   scope of this library.
 
-  See also `lookup-date`."
+  See also [[lookup-date]]."
   ([y m d] (lookup-date-in-year jerusalem-zone y m d))
   ([z y m d] (lookup-date-in-year jerusalem-lat jerusalem-lon z y m d))
   ([lat lon z y m d]
