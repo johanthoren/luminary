@@ -679,6 +679,8 @@
      :names (hebrew-names moy months-in-y dom dow)}))
 
 (defn- polar-adjusted?
+  "If `lat` is within the polar regions, check if the sunset has been adjusted
+  due to there not being a sunset at the given location."
   [lat lon t]
   (if (<= -65 lat 65)
     false
