@@ -897,7 +897,7 @@
   added."
   [year]
   (let [y (or (feast-days year)
-              (map-of-feast-days-in-year year))]
+              (get (map-of-feast-days-in-year year) year))]
     (sort (for [m (keys y)
                 d (keys (y m))
                 f (get-in y [m d])]
