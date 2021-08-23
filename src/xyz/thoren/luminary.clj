@@ -79,7 +79,9 @@
   (let [d-args (take 3 more)
         t-args (drop 3 more)
         d (apply tick/new-date d-args)
-        t (apply tick/new-time (if (>= (count t-args) 2) t-args [0 0]))]
+        t (apply tick/new-time (cond (empty? t-args) [0 0]
+                                     (= (count t-args) 1) [(first t-args) 0]
+                                     :else t-args))]
     (tick/in (tick/at d t) z)))
 
 (defn utc-zdt
