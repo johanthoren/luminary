@@ -489,6 +489,18 @@
          (first)
          (inc))))
 
+(defn- hebrew-year
+  [start-of-year]
+  (let [y (tick/int (tick/year start-of-year))]
+    (+ 4000 y)))
+
+(defn- trad-jewish-year
+  [month-of-year start-of-year]
+  (let [y (tick/int (tick/year start-of-year))]
+    (if (> month-of-year 6)
+      (+ 3761 y)
+      (+ 3760 y))))
+
 (def trad-month-names
   ["Nisan" "Iyar" "Sivan" "Tammuz" "Av" "Elul" "Tishrei" "Marcheshvan" "Kislev"
    "Tevet" "Shevat" "Adar" "Adar II"])
@@ -666,11 +678,14 @@
 (defn- hebrew-date
   [lat lon y m t]
   (let [months-in-y (hebrew-months-in-year lat lon t)
+        start-of-year (first y)
         moy (hebrew-month-of-year lat lon t)
         dom (hebrew-day-of-month lat lon t)
         dow (hebrew-day-of-week lat lon t)
-        major-feast-day (major-feast-day moy dom dow (first y) (first m))]
-    {:month-of-year moy
+        major-feast-day (major-feast-day moy dom dow start-of-year (first m))]
+    {:year (hebrew-year start-of-year)
+     :traditional-year (trad-jewish-year moy start-of-year)
+     :month-of-year moy
      :months-in-year months-in-y
      :day-of-month dom
      :days-in-month (hebrew-days-in-month lat lon t)

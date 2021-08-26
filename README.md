@@ -82,17 +82,19 @@ to calculate the day.
 ;; => 
 {:hebrew
  {:days-in-month 30,
-  :day-of-week 3,
+  :traditional-year 5781,
+  :day-of-week 5,
   :month-of-year 5,
   :minor-feast-day false,
-  :day-of-month 9,
+  :day-of-month 18,
+  :year 6021,
   :major-feast-day false,
   :sabbath false,
   :names
   {:month-of-year "5th",
    :traditional-month-of-year "Av",
-   :day-of-month "9th",
-   :day-of-week "3rd day of the week"},
+   :day-of-month "18th",
+   :day-of-week "5th day of the week"},
   :months-in-year 12},
  :time
  {:year
@@ -106,13 +108,13 @@ to calculate the day.
    :start-adjusted-for-polar-region false,
    :end-adjusted-for-polar-region false},
   :week
-  {:start #time/zoned-date-time "2021-08-14T19:23+03:00[Asia/Jerusalem]",
-   :end #time/zoned-date-time "2021-08-21T19:15:59+03:00[Asia/Jerusalem]",
+  {:start #time/zoned-date-time "2021-08-21T19:16+03:00[Asia/Jerusalem]",
+   :end #time/zoned-date-time "2021-08-28T19:07:59+03:00[Asia/Jerusalem]",
    :start-adjusted-for-polar-region false,
    :end-adjusted-for-polar-region false},
   :day
-  {:start #time/zoned-date-time "2021-08-16T19:21+03:00[Asia/Jerusalem]",
-   :end #time/zoned-date-time "2021-08-17T19:19:59+03:00[Asia/Jerusalem]",
+  {:start #time/zoned-date-time "2021-08-25T19:11+03:00[Asia/Jerusalem]",
+   :end #time/zoned-date-time "2021-08-26T19:09:59+03:00[Asia/Jerusalem]",
    :start-adjusted-for-polar-region false,
    :end-adjusted-for-polar-region false}}}
 ```
@@ -124,10 +126,12 @@ It too can be provided with a range of arguments which it passes on to `date`.
 ;; => 
 {:hebrew
  {:days-in-month 30,
+  :traditional-year 5781,
   :day-of-week 5,
   :month-of-year 5,
   :minor-feast-day false,
   :day-of-month 11,
+  :year 6021,
   :major-feast-day false,
   :sabbath false,
   :names
@@ -167,10 +171,12 @@ to find a `date` in.
 ;; => 
 {:hebrew
  {:days-in-month 30,
+  :traditional-year 5785,
   :day-of-week 7,
   :month-of-year 1,
   :minor-feast-day false,
   :day-of-month 14,
+  :year 6025,
   :major-feast-day
   {:name "Passover", :hebrew-name "Pesach", :day-of-feast 1, :days-in-feast 1},
   :sabbath true,

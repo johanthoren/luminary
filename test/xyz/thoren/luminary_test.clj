@@ -586,11 +586,15 @@
               (l/date tm-lat tm-lon
                       (apply l/zdt (flatten ["Asia/Jerusalem" args]))))]
       (let [h (r 2021 4 12 12 0)]
+        (is (= 6020 (get-in h [:hebrew :year])))
+        (is (= 5781 (get-in h [:hebrew :traditional-year])))
         (is (= 13 (get-in h [:hebrew :month-of-year])))
         (is (= 30 (get-in h [:hebrew :day-of-month])))
         (is (= 2 (get-in h [:hebrew :day-of-week])))
         (is (false? (get-in h [:hebrew :sabbath]))))
       (let [h (r 2021 4 12 23 0)]
+        (is (= 6021 (get-in h [:hebrew :year])))
+        (is (= 5781 (get-in h [:hebrew :traditional-year])))
         (is (= 1 (get-in h [:hebrew :month-of-year])))
         (is (= 1 (get-in h [:hebrew :day-of-month])))
         (is (= "Rosh Chodesh Nisan" (get-in h [:hebrew :minor-feast-day :hebrew-name])))
@@ -619,6 +623,8 @@
         (is (= "Feast of Weeks" (get-in h [:hebrew :major-feast-day :name])))
         (is (= "Sivan" (get-in h [:hebrew :names :traditional-month-of-year]))))
       (let [h (r 2021 10 6 23 0)]
+        (is (= 6021 (get-in h [:hebrew :year])))
+        (is (= 5782 (get-in h [:hebrew :traditional-year])))
         (is (= 7 (get-in h [:hebrew :month-of-year])))
         (is (= 1 (get-in h [:hebrew :day-of-month])))
         (is (= 5 (get-in h [:hebrew :day-of-week])))
@@ -675,6 +681,8 @@
         (is (= "Shushan Purim" (get-in h [:hebrew :major-feast-day :name])))
         (is (= "Adar I" (get-in h [:hebrew :names :traditional-month-of-year]))))
       (let [h (r 2021 3 26 23 0)]
+        (is (= 6020 (get-in h [:hebrew :year])))
+        (is (= 5781 (get-in h [:hebrew :traditional-year])))
         (is (= 13 (get-in h [:hebrew :month-of-year])))
         (is (= 14 (get-in h [:hebrew :day-of-month])))
         (is (= 7 (get-in h [:hebrew :day-of-week])))
