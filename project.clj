@@ -8,7 +8,7 @@
             :key "lgpl-3.0"}
   :dependencies [[org.clojure/clojure "1.10.3"]
                  [tick "0.5.0-RC1"]
-                 [xyz.thoren/equinox "1.0.0"]
+                 [xyz.thoren/equinox "2.0.0"]
                  [org.shredzone.commons/commons-suncalc "3.5"]]
   :repositories [["releases" {:url "https://repo.clojars.org"
                               :creds :gpg}]
