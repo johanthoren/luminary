@@ -854,16 +854,14 @@
 ;; re-generate the dates due to a change in the calculation method or future bug
 ;; fix.
 (def potential-feast-dates
-  (->> (concat (map #(vector 1 %) (range 14 22))
+  (set (concat (map #(vector 1 %) (range 14 22))
                (map #(vector 3 %) (range 5 13))
                [[7 1] [7 10]]
                (map #(vector 7 %) (range 15 23))
                (map #(vector 9 %) (range 25 31))
                (map #(vector 10 %) (range 1 4))
                [[12 14] [12 15]]
-               (map #(vector % 1) (range 1 14)))
-       sort
-       dedupe))
+               (map #(vector % 1) (range 1 14)))))
 
 (defn- feast-days-in-year
   [year]
