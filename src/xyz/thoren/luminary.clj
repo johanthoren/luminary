@@ -872,12 +872,12 @@
          (lookup-date-in-year y (first p) (last p)))
        (filter #(or (get-in % [:hebrew :minor-feast-day])
                     (get-in % [:hebrew :major-feast-day])))
-       (pmap #(let [s (get-in % [:time :day :start])]
-                (vector [(tick/int (tick/year s))
-                         (tick/int (tick/month s))
-                         (tick/day-of-month s)]
-                        (get-in % [:hebrew :minor-feast-day])
-                        (get-in % [:hebrew :major-feast-day]))))
+       (map #(let [s (get-in % [:time :day :start])]
+               (vector [(tick/int (tick/year s))
+                        (tick/int (tick/month s))
+                        (tick/day-of-month s)]
+                       (get-in % [:hebrew :minor-feast-day])
+                       (get-in % [:hebrew :major-feast-day]))))
        (map #(remove false? %))
        (filter #(= (ffirst %) year))
        (sort-by #(second (first %)))))
