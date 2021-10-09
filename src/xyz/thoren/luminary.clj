@@ -46,14 +46,14 @@
                 fd/feasts-2039]))
 
 (defn valid-zone?
-  "Given a string `s`, test if it can be transformed into a valid ZoneRegion.
-  Passing a ZoneRegion object will also return true."
+  "Test if a string  can be transformed into a valid ZoneRegion. Passing a
+  ZoneRegion object will also return true."
   [s]
   (tick/zone? (try (tick/zone s) (catch Exception _e nil))))
 
 (defn in-zone
-  "Given a valid timezone `z` (either a string or a ZoneRegion object),
-  and a ZonedDateTime object `t`, convert `t` to the same instant in `z`."
+  "Given either a string or a ZoneRegion object `z`, and a ZonedDateTime object
+  `t`, convert `t` to the same instant in `z`."
   [z t]
   {:pre [(valid-zone? z) (tick/zoned-date-time? t)]}
   (tick/in t z))
