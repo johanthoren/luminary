@@ -42,10 +42,11 @@ locations where the sunset will come before the lunar conjunction. This is so
 that everyone will keep the feast days together which would be impossible if one
 would not base the new year and the new month on the one in Israel.
 - For locations where the sun would not rise or set on a particular date, the
-latitude is adjusted to 65.7/-65.7 for that particular day, making sure that
-there is always a sunset to start the new day. This is how I imagine keeping the
-day count if moving to such a location. For days when there is a sunset at the
-actual coordinates, that sunset will be used.
+latitude is incrementally adjusted toward 65.7/-65.7 until a nearby latitude is
+found where the sun did rise, making sure that there is always a sunset to start
+the new day. This is how I imagine keeping the day count if moving to such a
+location. It's not perfect and I'm open to suggestions. For days when there is a
+sunset at the actual coordinates, that sunset will be used.
 - The location used to calculate the timing of the new year and the new month is
 the Temple Mount in Jerusalem.
 - The feast of First Fruits falls on the day following the weekly Sabbath during
