@@ -1,7 +1,6 @@
 # luminary
 
-A Clojure library designed to provide date calculations based on the Bible and
-the 1st Book of Enoch.
+A Clojure library designed to provide date calculations based on the Bible and the 1st Book of Enoch.
 
 > And God said, Let there be **lights** in the firmament of the heaven to divide
 > the day from the night; and let them be for signs, and for seasons, and for
@@ -15,19 +14,11 @@ the 1st Book of Enoch.
 
 ## Background
 
-The Bible instructs believers to keep several Feasts, or *Moedim*. There are
-several methods for determining what date it is according to the model described
-in the Bible. The most common would be [the Rabbinic
-Calendar](https://en.wikipedia.org/wiki/Hebrew_calendar) which is a mathematical
-calendar based on a lunar month and a solar year, but there are others, such as
-[the Karaite
-Calendar](https://en.wikipedia.org/wiki/Hebrew_calendar#Karaite_calendar), which
-is also has a lunar month and a solar year, but where observation of the new
-moon is the basis for a *new month* and the status of the Barley in Israel is
-the basis for a *new year*.
+The Bible instructs believers to keep several Feasts, or *Moedim*.
+There are several methods for determining what date it is according to the model described in the Bible. 
+The most common would be [the Rabbinic Calendar](https://en.wikipedia.org/wiki/Hebrew_calendar) which is a mathematical calendar based on a lunar month and a solar year, but there are others, such as [the Karaite Calendar](https://en.wikipedia.org/wiki/Hebrew_calendar#Karaite_calendar), which is also has a lunar month and a solar year, but where observation of the new moon is the basis for a *new month* and the status of the Barley in Israel is the basis for a *new year*.
 
-This library is based both on The Bible and the 1st Book of Enoch and follows
-the following conventions:
+This library is based both on The Bible and the 1st Book of Enoch and adheres the following conventions:
 
 - A new year will start at the first sunset after the first lunar conjunction
   following the March Equinox.
@@ -35,31 +26,29 @@ the following conventions:
 - A new day starts at the sunset.
 - The week starts on the evening of what is commonly known as Saturday.
 - The Sabbath falls on the last day of the 7 day week.
-- For locations outside of Israel, the new year and the new month will fall on
-the same Gregorian date as they did in Israel. For example, if the next month
-will start on the eve of March 3rd in Israel, the same will be true for
-locations where the sunset will come before the lunar conjunction. This is so
-that everyone will keep the feast days together which would be impossible if one
-would not base the new year and the new month on the one in Israel.
-- For locations where the sun would not rise or set on a particular date, the
-latitude is incrementally adjusted toward 65.7/-65.7 until a nearby latitude is
-found where the sun did rise, making sure that there is always a sunset to start
-the new day. This is how I imagine keeping the day count if moving to such a
-location. It's not perfect and I'm open to suggestions. For days when there is a
-sunset at the actual coordinates, that sunset will be used.
-- The location used to calculate the timing of the new year and the new month is
-the Temple Mount in Jerusalem.
-- The feast of First Fruits falls on the day following the weekly Sabbath during
-the Feast of Unleavened Bread.
+- For locations outside of Israel, the new year and the new month will fall on the same Gregorian date as they did in Israel. 
+  For example, if the next month will start on the eve of March 3rd in Israel, the same will be true for locations where the sunset will come before the lunar conjunction.
+  This is so that everyone will keep the feast days together which would be impossible if one would not base the new year and the new month on the one in Israel.
+- For locations where the sun would not rise or set on a particular date, the latitude is incrementally adjusted toward 65.7/-65.7 until a nearby latitude is found where the sun did rise, making sure that there is always a sunset to start the new day. 
+  This is how I imagine keeping the day count if moving to such a location. 
+  It's not perfect and I'm open to suggestions.
+  For days when there is a sunset at the actual coordinates, that sunset will be used.
+- The location used to calculate the timing of the new year and the new month is the Temple Mount in Jerusalem.
+- The feast of First Fruits falls on the day following the weekly Sabbath during the Feast of Unleavened Bread.
 - On leap years Purim falls on Adar I following the Karaite convention.
+
+## Applications using luminary
+
+- [bibcal](https://github.com/johanthoren/bibcal) is a command line application available for Windows, MacOS, and Linux.
+- [bibcal.org](https://www.bibcal.org) is a website which will automatically calculate the current biblical time based on your IP (or provided coordinates).
 
 ## Usage
 
 [![Clojars
 Project](https://img.shields.io/clojars/v/xyz.thoren/luminary.svg)](https://clojars.org/xyz.thoren/luminary)
 
-Note that Luminary is still in active development and things are changing with
-every release. Consider it unstable until a 1.0.0 release has been tagged.
+Note that Luminary is still in active development and things are changing with every release. 
+Consider it unstable until a 1.0.0 release has been tagged.
 
 Require:
 
@@ -73,11 +62,9 @@ See [the full API documentation](https://cljdoc.org/d/xyz.thoren/luminary).
 
 ### Examples
 
-`date` is the *main* function that constructs a map containing details about a
-day according to biblical timekeeping. The most simple use is without any
-arguments, which will give you the current biblical day in Jerusalem, Israel.
-However, you can provide a range of arguments to fully customize when and where
-to calculate the day.
+`date` is the *main* function that constructs a map containing details about a day according to biblical timekeeping. 
+The most simple use is without any arguments, which will give you the current biblical day in Jerusalem, Israel.
+However, you can provide a range of arguments to fully customize when and where to calculate the day.
 ``` clojure
 (l/date)
 ;; => 
@@ -164,9 +151,7 @@ It too can be provided with a range of arguments which it passes on to `date`.
    :end-adjusted-for-polar-region false}}}
 ```
 
-`lookup-date-in-year` is similar to `lookup-date` but allows you to provide a
-gregorian year, in which the hebrew year would have started that you are trying
-to find a `date` in.
+`lookup-date-in-year` is similar to `lookup-date` but allows you to provide a gregorian year, in which the hebrew year would have started that you are trying to find a `date` in.
 ``` clojure
 (l/lookup-date-in-year 78.2253587 15.4878901 "Europe/Oslo" 2025 1 14)
 ;; => 
@@ -210,8 +195,7 @@ to find a `date` in.
    :end-adjusted-for-polar-region false}}}
 ```
 
-`list-of-feast-days-in-year` will list the dates on which 
-holidays start at the sunset:
+`list-of-feast-days-in-year` will list the dates on which holidays start at the sunset:
 ``` clojure
 (l/list-of-feast-days-in-year 2021)
 ;; => 
@@ -256,31 +240,29 @@ holidays start at the sunset:
 
 ## Contribution
 
-Contributions are welcome, especially those related to performance improvements
-and bug fixes. Please don't open an issue or a pull request to *fix* the
-interpretation of Scripture leading to this calendar system. There are many
-calendar systems out there and I absolutely respect that no one can know with
-100% assurance how to calculate these matters until Messiah comes back.
+Contributions are welcome, especially those related to performance improvements and bug fixes. 
+Please don't open an issue or a pull request to change the calendar system itself. 
+There are many calendar systems out there and I absolutely respect that no one can know with 100% assurance how to calculate these matters until Messiah comes back.
 
 ## Acknowledgements
 
-- Sun and Moon calculations are provided by [shred's
-  commons-suncalc](https://github.com/shred/commons-suncalc).
-- Equinox calculations are provided by
-  [xyz.thoren.equinox](https://github.com/johanthoren/equinox).
+- Sun and Moon calculations are provided by [shred's commons-suncalc](https://github.com/shred/commons-suncalc).
+- Equinox calculations are provided by [xyz.thoren.equinox](https://github.com/johanthoren/equinox).
 - All time operations are utilizing [tick.core](https://github.com/juxt/tick).
 
 ## License
 
 Copyright &copy; 2021 Johan Thorén
 
-This project is licensed under the 
-[GNU Lesser General Public License v3.0][license].
+This project is licensed under the [GNU Lesser General Public License v3.0][license].
 
 [license]: https://choosealicense.com/licenses/lgpl-3.0
 
 ## Contributor Code of Conduct
 
-This project adheres to No Code of Conduct.  We are all adults.  We accept anyone's contributions.  Nothing else matters.
+This project adheres to No Code of Conduct. 
+We are all adults. 
+We accept anyone's contributions. 
+Nothing else matters.
 
 For more information please visit the [No Code of Conduct](https://github.com/domgetter/NCoC) homepage.
