@@ -781,7 +781,7 @@
   (lookup-date 59.3325800 18.0649000 1 14 (in-zone \"Europe/Stockholm\" (now)))
 
   The above will look for the 14th day of the 1st month in the hebrew year that
-  starts in the current gregorian year (based on the system time and timezone.
+  starts in the current gregorian year, based on the system time and timezone.
   The coordinates are those of Stockholm, Sweden. Using the `in-zone` function
   to make sure that `now` is returned in the correct timezone is recommended,
   in this case \"Europe/Stockholm\".
