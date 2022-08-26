@@ -759,7 +759,8 @@
          w (boundaries-of-week lat lon t)
          d (boundaries-of-day lat lon t)]
      {:hebrew (hebrew-date lat lon y m t)
-      :time (time-date lat lon y m w d)})))
+      :time (time-date lat lon y m w d)
+      :location {:latitude lat, :longitude lon}})))
 
 (defn lookup-date
   "Return a map containing the details of a `date` where:
