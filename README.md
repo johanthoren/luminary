@@ -252,7 +252,7 @@ There are many calendar systems out there and I absolutely respect that no one c
 
 ## License
 
-Copyright &copy; 2021 Johan Thorén
+Copyright &copy; 2021-2024 Johan Thorén
 
 This project is licensed under the [GNU Lesser General Public License v3.0][license].
 
